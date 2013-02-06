@@ -6,13 +6,19 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost
     public class Handler : IHandleMessages<SequentialProcess>
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Handler));
+        public IBus Bus { get; set; }
 
         public void Handle(SequentialProcess message)
         {
+            var routingSlip = Bus.GetRoutingSlipFromCurrentMessage();
+
             Logger.Info("Received message for sequential process.");
-            Logger.Info("Executed Step A: " + message.ExcecutedStepA);
-            Logger.Info("Executed Step B: " + message.ExcecutedStepB);
-            Logger.Info("Executed Step C: " + message.ExcecutedStepC);
+
+            foreach (var routeDefinition in routingSlip.RouteDefintions)
+            {
+                Logger.Info("Executed step at endpoint " + routeDefinition.Destination);
+            }
+            
             Logger.Info("========================================");
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace NServiceBus.MessageRouting.RoutingSlips
@@ -12,25 +13,29 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             return configure;
         }
 
-        public static void SendToFirstStep(this IBus bus, object message, params string[] destinations)
+        public static RoutingSlip GetRoutingSlipFromCurrentMessage(this IBus bus)
         {
-            var routeDefinitions = destinations.Select(destination => new RouteDefinition(destination, false)).ToArray();
-            
-            bus.SendToFirstStep(message, routeDefinitions);
+            string routingSlipJson;
+            if (bus.CurrentMessageContext.Headers.TryGetValue(Router.RoutingSlipHeaderKey, out routingSlipJson))
+            {
+                var routingSlip = JsonConvert.DeserializeObject<RoutingSlip>(routingSlipJson);
+
+                return routingSlip;
+            }
+
+            return null;
         }
 
-        public static void SendToFirstStep(this IBus bus, object message, params RouteDefinition[] routeDefinitions)
+
+        public static void Route(this IBus bus, object message, Guid routingSlipId, params string[] destinations)
         {
-            var routingSlip = new RoutingSlip(routeDefinitions);
+            var routeDefinitions = destinations.Select(destination => new RouteDefinition(destination)).ToArray();
 
-            var firstRouteDefinition = routeDefinitions.First();
+            var routingSlip = new RoutingSlip(routingSlipId, routeDefinitions);
 
-            var json = JsonConvert.SerializeObject(routingSlip);
+            var router = Configure.Instance.Builder.Build<Router>();
 
-            message.SetHeader(Router.RoutingSlipHeaderKey, json);
-
-            bus.Send(firstRouteDefinition.Destination, message);
+            router.SendToFirstStep(message, routingSlip);
         }
-
     }
 }

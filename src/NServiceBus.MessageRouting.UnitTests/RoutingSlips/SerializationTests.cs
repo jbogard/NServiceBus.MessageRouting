@@ -1,4 +1,5 @@
-﻿using NServiceBus.MessageRouting.RoutingSlips;
+﻿using System;
+using NServiceBus.MessageRouting.RoutingSlips;
 using NServiceBus.Serializers.Json;
 using NUnit.Framework;
 using Should;
@@ -14,11 +15,11 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
-            _routingSlip = new RoutingSlip(new[]
+            _routingSlip = new RoutingSlip(Guid.NewGuid(), new[]
             {
-                new RouteDefinition("foo", true),
-                new RouteDefinition("bar", false),
-                new RouteDefinition("bazz", true),
+                new RouteDefinition("foo"),
+                new RouteDefinition("bar"),
+                new RouteDefinition("bazz"),
             });
             _routingSlip.RouteDefintions[2].Handled = true;
 
@@ -41,7 +42,6 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             for (int i = 0; i < _routingSlip.RouteDefintions.Length; i++)
             {
                 _deserialized.RouteDefintions[i].Destination.ShouldEqual(_routingSlip.RouteDefintions[i].Destination);
-                _deserialized.RouteDefintions[i].ContinueOnError.ShouldEqual(_routingSlip.RouteDefintions[i].ContinueOnError);
                 _deserialized.RouteDefintions[i].Handled.ShouldEqual(_routingSlip.RouteDefintions[i].Handled);
             }
         }

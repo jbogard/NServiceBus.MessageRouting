@@ -39,7 +39,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
                     var messageABC = new SequentialProcess();
 
                     Logger.Info("Sending message for step A, B, C");
-                    Bus.SendToFirstStep(messageABC, new[]
+                    Bus.Route(messageABC, Guid.NewGuid(), new[]
                     {
                         "NServiceBus.MessageRouting.RoutingSlips.Samples.StepA",
                         "NServiceBus.MessageRouting.RoutingSlips.Samples.StepB",
@@ -52,11 +52,11 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
                     var messageAC = new SequentialProcess();
 
                     Logger.Info("Sending message for step A, C");
-                    Bus.SendToFirstStep(messageAC, new[]
+                    Bus.Route(messageAC, Guid.NewGuid(), new[]
                     {
-                        new RouteDefinition("NServiceBus.MessageRouting.RoutingSlips.Samples.StepA", false),
-                        new RouteDefinition("NServiceBus.MessageRouting.RoutingSlips.Samples.StepC", false),
-                        new RouteDefinition("NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost", false),
+                        "NServiceBus.MessageRouting.RoutingSlips.Samples.StepA",
+                        "NServiceBus.MessageRouting.RoutingSlips.Samples.StepC",
+                        "NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost",
                     });
                 }
 

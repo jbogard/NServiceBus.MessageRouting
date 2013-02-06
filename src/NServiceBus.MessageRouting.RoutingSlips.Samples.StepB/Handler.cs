@@ -1,12 +1,15 @@
 ﻿using NServiceBus.MessageRouting.RoutingSlips.Samples.Messages;
+using log4net;
 
 namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepB
 {
     public class Handler : IHandleMessages<SequentialProcess>
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(Handler));
+
         public void Handle(SequentialProcess message)
         {
-            message.ExcecutedStepB = true;
+            Logger.Info(message.StepBInfo);
         }
     }
 }
