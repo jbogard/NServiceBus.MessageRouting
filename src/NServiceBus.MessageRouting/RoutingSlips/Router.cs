@@ -54,7 +54,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
         public void SendToNextStep(TransportMessage message, RoutingSlip routingSlip, Exception ex)
         {
-            routingSlip.MarkCurrentStepAsHandled(ex);
+            routingSlip.MarkCurrentStepAsHandled();
 
             var nextAddress = routingSlip.GetFirstUnhandledStep();
 

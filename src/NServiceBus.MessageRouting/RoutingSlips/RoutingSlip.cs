@@ -26,7 +26,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             return RouteDefintions.LastOrDefault(r => r.Handled);
         }
 
-        public void MarkCurrentStepAsHandled(Exception ex)
+        public void MarkCurrentStepAsHandled()
         {
             var currentStep = GetFirstUnhandledStep();
 
