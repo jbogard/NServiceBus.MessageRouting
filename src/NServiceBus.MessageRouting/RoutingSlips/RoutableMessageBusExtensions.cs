@@ -13,29 +13,18 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             return configure;
         }
 
-        public static RoutingSlip GetRoutingSlipFromCurrentMessage(this IBus bus)
+        public static IRoutingSlip GetRoutingSlipFromCurrentMessage(this IBus bus)
         {
-            string routingSlipJson;
-            if (bus.CurrentMessageContext.Headers.TryGetValue(Router.RoutingSlipHeaderKey, out routingSlipJson))
-            {
-                var routingSlip = JsonConvert.DeserializeObject<RoutingSlip>(routingSlipJson);
+            var router = Configure.Instance.Builder.Build<IRouter>();
 
-                return routingSlip;
-            }
-
-            return null;
+            return router.GetRoutingSlipFromCurrentMessage();
         }
-
 
         public static void Route(this IBus bus, object message, Guid routingSlipId, params string[] destinations)
         {
-            var routeDefinitions = destinations.Select(destination => new RouteDefinition(destination)).ToArray();
+            var router = Configure.Instance.Builder.Build<IRouter>();
 
-            var routingSlip = new RoutingSlip(routingSlipId, routeDefinitions);
-
-            var router = Configure.Instance.Builder.Build<Router>();
-
-            router.SendToFirstStep(message, routingSlip);
+            router.SendToFirstStep(message, routingSlipId, destinations);
         }
     }
 }

@@ -50,10 +50,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RoutingSlips\IRouteDefinition.cs" />
+    <Compile Include="RoutingSlips\IRouter.cs" />
     <Compile Include="RoutingSlips\RoutableMessageBusExtensions.cs" />
-    <Compile Include="RoutingSlips\RouteDefinition.cs" />
     <Compile Include="RoutingSlips\Router.cs" />
-    <Compile Include="RoutingSlips\RoutingSlip.cs" />
+    <Compile Include="RoutingSlips\IRoutingSlip.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

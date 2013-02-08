@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NServiceBus.MessageMutator;
 using NServiceBus.Unicast.Queuing;
@@ -8,25 +9,31 @@ using Newtonsoft.Json;
 
 namespace NServiceBus.MessageRouting.RoutingSlips
 {
-    public class Router : IManageUnitsOfWork, IMutateIncomingTransportMessages
+    public class Router : IRouter, IManageUnitsOfWork, IMutateIncomingTransportMessages
     {
         [ThreadStatic]
         private static TransportMessage _currentMessage;
-        public static readonly string RoutingSlipHeaderKey = "NServiceBus.MessageRouting.RoutingSlips.RoutingSlip";
+        private const string RoutingSlipHeaderKey = "NServiceBus.MessageRouting.RoutingSlips.RoutingSlip";
 
-        public IBus Bus { get; set; }
-        public ISendMessages MessageSender { get; set; }
+        private readonly IBus _bus;
+        private readonly ISendMessages _messageSender;
 
-        public void Begin()
+        public Router(IBus bus, ISendMessages messageSender)
+        {
+            _bus = bus;
+            _messageSender = messageSender;
+        }
+
+        void IManageUnitsOfWork.Begin()
         {
         }
 
-        public void End(Exception ex = null)
+        void IManageUnitsOfWork.End(Exception ex)
         {
             if (_currentMessage == null)
                 return;
 
-            var routingSlip = Bus.GetRoutingSlipFromCurrentMessage();
+            var routingSlip = GetRoutingSlipFromCurrentMessageInternal();
 
             if (routingSlip == null)
                 return;
@@ -36,23 +43,25 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             _currentMessage = null;
         }
 
-        public void MutateIncoming(TransportMessage message)
+        void IMutateIncomingTransportMessages.MutateIncoming(TransportMessage message)
         {
             _currentMessage = message;
         }
 
-        public void SendToFirstStep(object message, RoutingSlip routingSlip)
+        public void SendToFirstStep(object message, Guid routingSlipId, params string[] destinations)
         {
-            var firstRouteDefinition = routingSlip.RouteDefintions.First();
+            var routingSlip = new RoutingSlip(routingSlipId, destinations.Select(d => new RoutingSlip.RouteDefinition(d)).ToArray());
+
+            var firstRouteDefinition = routingSlip.GetFirstUnhandledStep();
 
             var json = JsonConvert.SerializeObject(routingSlip);
 
             message.SetHeader(RoutingSlipHeaderKey, json);
 
-            Bus.Send(firstRouteDefinition.Destination, message);
+            _bus.Send(firstRouteDefinition.Destination, message);
         }
 
-        public void SendToNextStep(TransportMessage message, RoutingSlip routingSlip, Exception ex)
+        private void SendToNextStep(TransportMessage message, RoutingSlip routingSlip, Exception ex)
         {
             routingSlip.MarkCurrentStepAsHandled();
 
@@ -70,7 +79,72 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
             var address = Address.Parse(nextAddress.Destination);
 
-            MessageSender.Send(message, address);
+            _messageSender.Send(message, address);
+        }
+
+        public IRoutingSlip GetRoutingSlipFromCurrentMessage()
+        {
+            return GetRoutingSlipFromCurrentMessageInternal();
+        }
+
+        private RoutingSlip GetRoutingSlipFromCurrentMessageInternal()
+        {
+            string routingSlipJson;
+
+            if (_bus.CurrentMessageContext.Headers.TryGetValue(RoutingSlipHeaderKey, out routingSlipJson))
+            {
+                var routingSlip = JsonConvert.DeserializeObject<RoutingSlip>(routingSlipJson);
+
+                return routingSlip;
+            }
+
+            return null;
+        }
+
+        private class RoutingSlip : IRoutingSlip
+        {
+            [JsonProperty]
+            private readonly RouteDefinition[] _routeDefinitions;
+
+            [JsonConstructor]
+            public RoutingSlip(Guid id, RouteDefinition[] routeDefinitions)
+            {
+                _routeDefinitions = routeDefinitions;
+                Id = id;
+            }
+
+            public Guid Id { get; private set; }
+
+            public IReadOnlyList<IRouteDefinition> GetRouteDefintions()
+            {
+                return _routeDefinitions;
+            }
+
+            public RouteDefinition GetFirstUnhandledStep()
+            {
+                return _routeDefinitions.SkipWhile(r => r.Handled).FirstOrDefault();
+            }
+
+            public void MarkCurrentStepAsHandled()
+            {
+                var currentStep = GetFirstUnhandledStep();
+
+                if (currentStep == null)
+                    return;
+
+                currentStep.Handled = true;
+            }
+
+            public class RouteDefinition : IRouteDefinition
+            {
+                public RouteDefinition(string destination)
+                {
+                    Destination = destination;
+                }
+
+                public string Destination { get; private set; }
+                public bool Handled { get; set; }
+            }
         }
     }
 }
