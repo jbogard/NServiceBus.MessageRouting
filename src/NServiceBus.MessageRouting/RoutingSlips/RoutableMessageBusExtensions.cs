@@ -17,7 +17,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips
         {
             var router = Configure.Instance.Builder.Build<IRouter>();
 
-            return router.GetRoutingSlipFromCurrentMessage();
+            return router.GetRoutingSlip();
         }
 
         public static void Route(this IBus bus, object message, Guid routingSlipId, params string[] destinations)

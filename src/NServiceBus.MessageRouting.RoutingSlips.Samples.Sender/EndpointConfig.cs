@@ -36,7 +36,12 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
             {
                 if (toggle)
                 {
-                    var messageABC = new SequentialProcess();
+                    var messageABC = new SequentialProcess
+                        {
+                            StepAInfo = "Foo",
+                            StepBInfo = "Bar",
+                            StepCInfo = "Baz",
+                        };
 
                     Logger.Info("Sending message for step A, B, C");
                     Bus.Route(messageABC, Guid.NewGuid(), new[]
@@ -49,7 +54,11 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
                 }
                 else
                 {
-                    var messageAC = new SequentialProcess();
+                    var messageAC = new SequentialProcess
+                    {
+                        StepAInfo = "Foo",
+                        StepCInfo = "Baz",
+                    };
 
                     Logger.Info("Sending message for step A, C");
                     Bus.Route(messageAC, Guid.NewGuid(), new[]

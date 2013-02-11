@@ -13,6 +13,9 @@ namespace NServiceBus.MessageRouting.RoutingSlips
     {
         [ThreadStatic]
         private static TransportMessage _currentMessage;
+        [ThreadStatic]
+        private static RoutingSlip _routingSlip;
+
         private const string RoutingSlipHeaderKey = "NServiceBus.MessageRouting.RoutingSlips.RoutingSlip";
 
         private readonly IBus _bus;
@@ -24,6 +27,11 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             _messageSender = messageSender;
         }
 
+        public IRoutingSlip GetRoutingSlip()
+        {
+            return _routingSlip;
+        }
+
         void IManageUnitsOfWork.Begin()
         {
         }
@@ -33,19 +41,30 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             if (_currentMessage == null)
                 return;
 
-            var routingSlip = GetRoutingSlipFromCurrentMessageInternal();
-
-            if (routingSlip == null)
+            if (_routingSlip == null)
                 return;
 
-            SendToNextStep(_currentMessage, routingSlip, ex);
-
-            _currentMessage = null;
+            try
+            {
+                SendToNextStep(ex);
+            }
+            finally
+            {
+                _currentMessage = null;
+                _routingSlip = null;
+            }
         }
 
         void IMutateIncomingTransportMessages.MutateIncoming(TransportMessage message)
         {
             _currentMessage = message;
+
+            string routingSlipJson;
+
+            if (_bus.CurrentMessageContext.Headers.TryGetValue(RoutingSlipHeaderKey, out routingSlipJson))
+            {
+                _routingSlip = JsonConvert.DeserializeObject<RoutingSlip>(routingSlipJson);
+            }
         }
 
         public void SendToFirstStep(object message, Guid routingSlipId, params string[] destinations)
@@ -61,11 +80,11 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             _bus.Send(firstRouteDefinition.Destination, message);
         }
 
-        private void SendToNextStep(TransportMessage message, RoutingSlip routingSlip, Exception ex)
+        private void SendToNextStep(Exception ex)
         {
-            routingSlip.MarkCurrentStepAsHandled();
+            _routingSlip.MarkCurrentStepAsHandled();
 
-            var nextAddress = routingSlip.GetFirstUnhandledStep();
+            var nextAddress = _routingSlip.GetFirstUnhandledStep();
 
             if (nextAddress == null)
                 return;
@@ -73,32 +92,13 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             if (ex != null)
                 return;
 
-            var json = JsonConvert.SerializeObject(routingSlip);
+            var json = JsonConvert.SerializeObject(_routingSlip);
 
-            message.Headers[RoutingSlipHeaderKey] = json;
+            _currentMessage.Headers[RoutingSlipHeaderKey] = json;
 
             var address = Address.Parse(nextAddress.Destination);
 
-            _messageSender.Send(message, address);
-        }
-
-        public IRoutingSlip GetRoutingSlipFromCurrentMessage()
-        {
-            return GetRoutingSlipFromCurrentMessageInternal();
-        }
-
-        private RoutingSlip GetRoutingSlipFromCurrentMessageInternal()
-        {
-            string routingSlipJson;
-
-            if (_bus.CurrentMessageContext.Headers.TryGetValue(RoutingSlipHeaderKey, out routingSlipJson))
-            {
-                var routingSlip = JsonConvert.DeserializeObject<RoutingSlip>(routingSlipJson);
-
-                return routingSlip;
-            }
-
-            return null;
+            _messageSender.Send(_currentMessage, address);
         }
 
         private class RoutingSlip : IRoutingSlip
@@ -111,11 +111,13 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             {
                 _routeDefinitions = routeDefinitions;
                 Id = id;
+                Values = new Dictionary<string, string>();
             }
 
             public Guid Id { get; private set; }
+            public IDictionary<string, string> Values { get; private set; }
 
-            public IReadOnlyList<IRouteDefinition> GetRouteDefintions()
+            public IReadOnlyList<IRouteDefinition> GetRouteDefinitions()
             {
                 return _routeDefinitions;
             }

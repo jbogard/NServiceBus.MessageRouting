@@ -5,7 +5,8 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 {
     public interface IRoutingSlip
     {
-        IReadOnlyList<IRouteDefinition> GetRouteDefintions();
+        IReadOnlyList<IRouteDefinition> GetRouteDefinitions();
         Guid Id { get; }
+        IDictionary<string, string> Values { get; }
     }
 }
