@@ -15,7 +15,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepC
 
             string fooValue;
             
-            if (slip.Values.TryGetValue("Foo", out fooValue))
+            if (slip.Attachments.TryGetValue("Foo", out fooValue))
             {
                 Logger.Info("Found Foo value of " + fooValue);
             }

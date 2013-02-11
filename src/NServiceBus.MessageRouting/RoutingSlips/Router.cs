@@ -69,7 +69,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
         public void SendToFirstStep(object message, Guid routingSlipId, params string[] destinations)
         {
-            var routingSlip = new RoutingSlip(routingSlipId, destinations.Select(d => new RoutingSlip.RouteDefinition(d)).ToArray());
+            var routingSlip = new RoutingSlip(routingSlipId, destinations.Select(d => new RoutingSlip.ProcessingStep { DestinationAddress = d }).ToArray());
 
             var firstRouteDefinition = routingSlip.GetFirstUnhandledStep();
 
@@ -77,7 +77,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
             message.SetHeader(RoutingSlipHeaderKey, json);
 
-            _bus.Send(firstRouteDefinition.Destination, message);
+            _bus.Send(firstRouteDefinition.DestinationAddress, message);
         }
 
         private void SendToNextStep(Exception ex)
@@ -96,35 +96,36 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
             _currentMessage.Headers[RoutingSlipHeaderKey] = json;
 
-            var address = Address.Parse(nextAddress.Destination);
+            var address = Address.Parse(nextAddress.DestinationAddress);
 
             _messageSender.Send(_currentMessage, address);
         }
 
         private class RoutingSlip : IRoutingSlip
         {
-            [JsonProperty]
-            private readonly RouteDefinition[] _routeDefinitions;
+            [JsonProperty("ProcessingSteps")]
+            private readonly ProcessingStep[] _processingSteps;
 
             [JsonConstructor]
-            public RoutingSlip(Guid id, RouteDefinition[] routeDefinitions)
+            public RoutingSlip(Guid id, ProcessingStep[] processingSteps)
             {
-                _routeDefinitions = routeDefinitions;
+                _processingSteps = processingSteps;
                 Id = id;
-                Values = new Dictionary<string, string>();
+                Attachments = new Dictionary<string, string>();
             }
 
             public Guid Id { get; private set; }
-            public IDictionary<string, string> Values { get; private set; }
+            public IDictionary<string, string> Attachments { get; private set; }
 
-            public IReadOnlyList<IRouteDefinition> GetRouteDefinitions()
+            [JsonIgnore]
+            public IEnumerable<IProcessingStep> ProcessingSteps
             {
-                return _routeDefinitions;
+                get { return _processingSteps; }
             }
 
-            public RouteDefinition GetFirstUnhandledStep()
+            public ProcessingStep GetFirstUnhandledStep()
             {
-                return _routeDefinitions.SkipWhile(r => r.Handled).FirstOrDefault();
+                return _processingSteps.SkipWhile(r => r.Handled).FirstOrDefault();
             }
 
             public void MarkCurrentStepAsHandled()
@@ -137,14 +138,9 @@ namespace NServiceBus.MessageRouting.RoutingSlips
                 currentStep.Handled = true;
             }
 
-            public class RouteDefinition : IRouteDefinition
+            public class ProcessingStep : IProcessingStep
             {
-                public RouteDefinition(string destination)
-                {
-                    Destination = destination;
-                }
-
-                public string Destination { get; private set; }
+                public string DestinationAddress { get; set; }
                 public bool Handled { get; set; }
             }
         }

@@ -1,8 +1,8 @@
 ﻿namespace NServiceBus.MessageRouting.RoutingSlips
 {
-    public interface IRouteDefinition
+    public interface IProcessingStep
     {
-        string Destination { get; }
+        string DestinationAddress { get; }
         bool Handled { get; }
     }
 }

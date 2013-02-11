@@ -13,7 +13,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepA
             Logger.Info(message.StepAInfo);
             var slip = Bus.GetRoutingSlipFromCurrentMessage();
 
-            slip.Values["Foo"] = "Bar";
+            slip.Attachments["Foo"] = "Bar";
         }
     }
 }
