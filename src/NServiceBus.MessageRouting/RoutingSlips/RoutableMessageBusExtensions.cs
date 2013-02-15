@@ -26,5 +26,10 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
             router.SendToFirstStep(message, routingSlipId, destinations);
         }
+
+        public static void Route(this IBus bus, object message, params string[] destinations)
+        {
+            bus.Route(message, Guid.NewGuid(), destinations);
+        }
     }
 }
