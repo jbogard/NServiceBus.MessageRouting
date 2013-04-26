@@ -15,6 +15,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepB
         public void Init()
         {
             Configure.Instance.RoutingSlips();
+            SetLoggingLibrary.Log4Net();
         }
     }
 }

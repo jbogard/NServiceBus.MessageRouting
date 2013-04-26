@@ -19,6 +19,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost
         public void Init()
         {
             Configure.Instance.RoutingSlips();
+            SetLoggingLibrary.Log4Net();
         }
     }
 }

@@ -19,6 +19,8 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
         public void Init()
         {
             Configure.Instance.RoutingSlips();
+
+            SetLoggingLibrary.Log4Net();
         }
     }
 
@@ -37,11 +39,11 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
                 if (toggle)
                 {
                     var messageABC = new SequentialProcess
-                        {
-                            StepAInfo = "Foo",
-                            StepBInfo = "Bar",
-                            StepCInfo = "Baz",
-                        };
+                    {
+                        StepAInfo = "Foo",
+                        StepBInfo = "Bar",
+                        StepCInfo = "Baz",
+                    };
 
                     Logger.Info("Sending message for step A, B, C");
                     Bus.Route(messageABC, Guid.NewGuid(), new[]
@@ -67,11 +69,18 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
                         "NServiceBus.MessageRouting.RoutingSlips.Samples.StepC",
                         "NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost",
                     });
+
+                    Bus.Route(messageAC, Guid.NewGuid(), new[]
+                    {
+                        "NServiceBus.MessageRouting.RoutingSlips.Samples.StepA",
+                        "NServiceBus.MessageRouting.RoutingSlips.Samples.StepC",
+                        "NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost",
+                    });
+
                 }
 
                 toggle = !toggle;
             }
-
 
         }
 
