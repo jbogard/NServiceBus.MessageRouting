@@ -1,11 +1,11 @@
 ﻿using System;
+using NServiceBus.Unicast.Transport;
 
 namespace NServiceBus.MessageRouting.RoutingSlips
 {
     public interface IRouter
     {
-        IRoutingSlip GetRoutingSlip();
-
-        void SendToFirstStep(object message, Guid routingSlipId, params string[] destinations);
+        void SendToFirstStep(object message, RoutingSlip routingSlip);
+        void SendToNextStep(TransportMessage message, Exception ex, RoutingSlip routingSlip);
     }
 }

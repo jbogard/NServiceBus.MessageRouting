@@ -69,14 +69,6 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
                         "NServiceBus.MessageRouting.RoutingSlips.Samples.StepC",
                         "NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost",
                     });
-
-                    Bus.Route(messageAC, Guid.NewGuid(), new[]
-                    {
-                        "NServiceBus.MessageRouting.RoutingSlips.Samples.StepA",
-                        "NServiceBus.MessageRouting.RoutingSlips.Samples.StepC",
-                        "NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost",
-                    });
-
                 }
 
                 toggle = !toggle;

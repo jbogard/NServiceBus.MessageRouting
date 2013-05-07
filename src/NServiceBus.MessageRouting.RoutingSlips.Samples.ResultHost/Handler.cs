@@ -14,9 +14,9 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost
 
             Logger.Info("Received message for sequential process.");
 
-            foreach (var routeDefinition in routingSlip.ProcessingSteps)
+            foreach (var routeDefinition in routingSlip.Log)
             {
-                Logger.Info("Executed step at endpoint " + routeDefinition.DestinationAddress);
+                Logger.Info("Executed step at endpoint " + routeDefinition.Address);
             }
             
             Logger.Info("========================================");

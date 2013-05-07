@@ -1,22 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using NServiceBus.MessageMutator;
 using NServiceBus.Unicast.Queuing;
 using NServiceBus.Unicast.Transport;
-using NServiceBus.UnitOfWork;
 using Newtonsoft.Json;
 
 namespace NServiceBus.MessageRouting.RoutingSlips
 {
-    public class Router : IRouter, IManageUnitsOfWork, IMutateIncomingTransportMessages
+    public class Router : IRouter
     {
-        [ThreadStatic]
-        private static TransportMessage _currentMessage;
-        [ThreadStatic]
-        private static RoutingSlip _routingSlip;
-
-        private const string RoutingSlipHeaderKey = "NServiceBus.MessageRouting.RoutingSlips.RoutingSlip";
+        public const string RoutingSlipHeaderKey = "NServiceBus.MessageRouting.RoutingSlips.RoutingSlip";
 
         private readonly IBus _bus;
         private readonly ISendMessages _messageSender;
@@ -27,122 +19,45 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             _messageSender = messageSender;
         }
 
-        public IRoutingSlip GetRoutingSlip()
+        public void SendToFirstStep(object message, RoutingSlip routingSlip)
         {
-            return _routingSlip;
-        }
-
-        void IManageUnitsOfWork.Begin()
-        {
-        }
-
-        void IManageUnitsOfWork.End(Exception ex)
-        {
-            if (_currentMessage == null)
-                return;
-
-            if (_routingSlip == null)
-                return;
-
-            try
-            {
-                SendToNextStep(ex);
-            }
-            finally
-            {
-                _currentMessage = null;
-                _routingSlip = null;
-            }
-        }
-
-        void IMutateIncomingTransportMessages.MutateIncoming(TransportMessage message)
-        {
-            _currentMessage = message;
-
-            string routingSlipJson;
-
-            if (_bus.CurrentMessageContext.Headers.TryGetValue(RoutingSlipHeaderKey, out routingSlipJson))
-            {
-                _routingSlip = JsonConvert.DeserializeObject<RoutingSlip>(routingSlipJson);
-            }
-        }
-
-        public void SendToFirstStep(object message, Guid routingSlipId, params string[] destinations)
-        {
-            var routingSlip = new RoutingSlip(routingSlipId, destinations.Select(d => new RoutingSlip.ProcessingStep { DestinationAddress = d }).ToArray());
-
-            var firstRouteDefinition = routingSlip.GetFirstUnhandledStep();
+            var firstRouteDefinition = routingSlip.Itinerary.First();
 
             var json = JsonConvert.SerializeObject(routingSlip);
 
-            message.SetHeader(RoutingSlipHeaderKey, json);
+            _bus.OutgoingHeaders[RoutingSlipHeaderKey] = json;
 
-            _bus.Send(firstRouteDefinition.DestinationAddress, message);
+            _bus.Send(firstRouteDefinition.Address, message);
         }
 
-        private void SendToNextStep(Exception ex)
+        public void SendToNextStep(TransportMessage message, Exception ex, RoutingSlip routingSlip)
         {
-            _routingSlip.MarkCurrentStepAsHandled();
-
-            var nextAddress = _routingSlip.GetFirstUnhandledStep();
-
-            if (nextAddress == null)
-                return;
-
             if (ex != null)
                 return;
 
-            var json = JsonConvert.SerializeObject(_routingSlip);
+            var currentStep = routingSlip.Itinerary.First();
+            
+            routingSlip.Itinerary.RemoveAt(0);
 
-            _currentMessage.Headers[RoutingSlipHeaderKey] = json;
-
-            var address = Address.Parse(nextAddress.DestinationAddress);
-
-            _messageSender.Send(_currentMessage, address);
-        }
-
-        private class RoutingSlip : IRoutingSlip
-        {
-            [JsonProperty("ProcessingSteps")]
-            private readonly ProcessingStep[] _processingSteps;
-
-            [JsonConstructor]
-            public RoutingSlip(Guid id, ProcessingStep[] processingSteps)
+            var result = new ProcessingStepResult
             {
-                _processingSteps = processingSteps;
-                Id = id;
-                Attachments = new Dictionary<string, string>();
-            }
+                Address = currentStep.Address,
+            };
 
-            public Guid Id { get; private set; }
-            public IDictionary<string, string> Attachments { get; private set; }
+            routingSlip.Log.Add(result);
 
-            [JsonIgnore]
-            public IEnumerable<IProcessingStep> ProcessingSteps
-            {
-                get { return _processingSteps; }
-            }
+            var nextStep = routingSlip.Itinerary.FirstOrDefault();
 
-            public ProcessingStep GetFirstUnhandledStep()
-            {
-                return _processingSteps.SkipWhile(r => r.Handled).FirstOrDefault();
-            }
+            if (nextStep == null)
+                return;
 
-            public void MarkCurrentStepAsHandled()
-            {
-                var currentStep = GetFirstUnhandledStep();
+            var json = JsonConvert.SerializeObject(routingSlip);
 
-                if (currentStep == null)
-                    return;
+            message.Headers[RoutingSlipHeaderKey] = json;
 
-                currentStep.Handled = true;
-            }
+            var address = Address.Parse(nextStep.Address);
 
-            public class ProcessingStep : IProcessingStep
-            {
-                public string DestinationAddress { get; set; }
-                public bool Handled { get; set; }
-            }
+            _messageSender.Send(message, address);
         }
     }
 }

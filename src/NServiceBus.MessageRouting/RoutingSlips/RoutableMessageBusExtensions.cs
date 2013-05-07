@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using Newtonsoft.Json;
 
 namespace NServiceBus.MessageRouting.RoutingSlips
 {
@@ -9,27 +7,31 @@ namespace NServiceBus.MessageRouting.RoutingSlips
         public static Configure RoutingSlips(this Configure configure)
         {
             configure.Configurer.ConfigureComponent<Router>(DependencyLifecycle.SingleInstance);
+            configure.Configurer.ConfigureComponent<RouteSupervisor>(DependencyLifecycle.SingleInstance);
+            configure.Configurer.ConfigureComponent<RoutingSlipBuilder>(DependencyLifecycle.SingleInstance);
 
             return configure;
         }
 
-        public static IRoutingSlip GetRoutingSlipFromCurrentMessage(this IBus bus)
+        public static RoutingSlip GetRoutingSlipFromCurrentMessage(this IBus bus)
         {
-            var router = Configure.Instance.Builder.Build<IRouter>();
-
-            return router.GetRoutingSlip();
-        }
-
-        public static void Route(this IBus bus, object message, Guid routingSlipId, params string[] destinations)
-        {
-            var router = Configure.Instance.Builder.Build<IRouter>();
-
-            router.SendToFirstStep(message, routingSlipId, destinations);
+            return Configure.Instance.Builder.Build<IRouteSupervisor>().RoutingSlip;
         }
 
         public static void Route(this IBus bus, object message, params string[] destinations)
         {
             bus.Route(message, Guid.NewGuid(), destinations);
+        }
+
+        public static void Route(this IBus bus, object message, Guid routingSlipId, params string[] destinations)
+        {
+            var builder = new RoutingSlipBuilder();
+            
+            var routingSlip = builder.CreateRoutingSlip(routingSlipId, destinations);
+
+            var router = Configure.Instance.Builder.Build<IRouter>();
+
+            router.SendToFirstStep(message, routingSlip);
         }
     }
 }
