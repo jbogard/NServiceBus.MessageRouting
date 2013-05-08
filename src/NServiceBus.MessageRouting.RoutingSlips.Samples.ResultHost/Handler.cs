@@ -19,7 +19,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost
                 Logger.Info("Executed step at endpoint " + routeDefinition.Address);
             }
             
-            Logger.Info("========================================");
+            Logger.Info("======================================== blarg");
         }
     }
 }
