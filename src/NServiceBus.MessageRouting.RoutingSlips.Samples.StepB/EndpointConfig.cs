@@ -1,3 +1,5 @@
+using NServiceBus.Diagnostics;
+
 namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepB 
 {
     using NServiceBus;
@@ -14,7 +16,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepB
     {
         public void Init()
         {
-            Configure.Instance.RoutingSlips();
+            Configure.Instance.RoutingSlips().Diagnostics();
             SetLoggingLibrary.Log4Net();
         }
     }

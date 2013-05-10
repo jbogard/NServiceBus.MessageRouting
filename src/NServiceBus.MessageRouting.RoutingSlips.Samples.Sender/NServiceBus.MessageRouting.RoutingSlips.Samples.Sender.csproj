@@ -76,6 +76,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\NServiceBus.Diagnostics\NServiceBus.Diagnostics.csproj">
+      <Project>{c0812efa-d716-4abf-bb98-e839680cefd8}</Project>
+      <Name>NServiceBus.Diagnostics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NServiceBus.MessageRouting.RoutingSlips.Samples.Messages\NServiceBus.MessageRouting.RoutingSlips.Samples.Messages.csproj">
       <Project>{9F1A4636-327C-4097-A3CB-BB722430F99B}</Project>
       <Name>NServiceBus.MessageRouting.RoutingSlips.Samples.Messages</Name>

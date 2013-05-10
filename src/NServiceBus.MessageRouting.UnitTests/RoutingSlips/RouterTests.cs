@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using FakeItEasy;
 using NServiceBus.MessageRouting.RoutingSlips;
-using NServiceBus.Unicast.Queuing;
-using NServiceBus.Unicast.Transport;
 using NUnit.Framework;
 using Should;
 
@@ -39,7 +35,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             var routingSlip = new RoutingSlipBuilder().CreateRoutingSlip(Guid.NewGuid(), "foo");
 
             var bus = new Bus();
-            var router = new Router(bus, null);
+            var router = new Router(bus);
 
             var message = new DummyMessage();
             router.SendToFirstStep(message, routingSlip);
@@ -56,25 +52,18 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             var routingSlip = new RoutingSlipBuilder().CreateRoutingSlip(Guid.NewGuid(), "foo", "bar");
 
             var bus = new Bus();
-            var sender = A.Fake<ISendMessages>();
-            var router = new Router(bus, sender);
+            var router = new Router(bus);
 
-            var message = new TransportMessage
-            {
-                Headers = new Dictionary<string, string>()
-            };
-            router.SendToNextStep(message, null, routingSlip);
+            router.SendToNextStep(null, routingSlip);
 
-            message.Headers[Router.RoutingSlipHeaderKey].ShouldNotBeNull();
+            bus.CurrentMessageContext.Headers[Router.RoutingSlipHeaderKey].ShouldNotBeNull();
 
             routingSlip.Itinerary.Count.ShouldEqual(1);
             routingSlip.Log.Count.ShouldEqual(1);
             routingSlip.Log[0].Address.ShouldEqual("foo");
 
-            var nextDestination = Address.Parse("bar");
-            A.CallTo(() => sender.Send(message, nextDestination)).MustHaveHappened();
-
-
+            bus.Forwarded.Count().ShouldEqual(1);
+            bus.Forwarded.ShouldContain("bar");
         }
 
         [Test]
@@ -83,27 +72,21 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             var routingSlip = new RoutingSlipBuilder().CreateRoutingSlip(Guid.NewGuid(), "foo", "bar");
 
             var bus = new Bus();
-            var sender = A.Fake<ISendMessages>();
-            var router = new Router(bus, sender);
+            var router = new Router(bus);
 
-            var message = new TransportMessage
-            {
-                Headers = new Dictionary<string, string>()
-            };
-            router.SendToNextStep(message, null, routingSlip);
+            router.SendToNextStep(null, routingSlip);
             
-            message.Headers.Clear();
+            bus.CurrentMessageContext.Headers.Clear();
             
-            router.SendToNextStep(message, null, routingSlip);
+            router.SendToNextStep(null, routingSlip);
 
-            message.Headers.ContainsKey(Router.RoutingSlipHeaderKey).ShouldBeFalse();
+            bus.CurrentMessageContext.Headers.ContainsKey(Router.RoutingSlipHeaderKey).ShouldBeFalse();
 
             routingSlip.Itinerary.Count.ShouldEqual(0);
             routingSlip.Log.Count.ShouldEqual(2);
             routingSlip.Log[0].Address.ShouldEqual("foo");
 
-            A.CallTo(() => sender.Send(message, null)).WithAnyArguments().MustHaveHappened(Repeated.NoMoreThan.Once);
-
+            bus.Forwarded.Count().ShouldEqual(1);
 
         }
 
@@ -114,22 +97,16 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             var routingSlip = new RoutingSlipBuilder().CreateRoutingSlip(Guid.NewGuid(), "foo", "bar");
 
             var bus = new Bus();
-            var sender = A.Fake<ISendMessages>();
-            var router = new Router(bus, sender);
+            var router = new Router(bus);
 
-            var message = new TransportMessage
-            {
-                Headers = new Dictionary<string, string>()
-            };
-            router.SendToNextStep(message, new Exception(), routingSlip);
+            router.SendToNextStep(new Exception(), routingSlip);
 
-            message.Headers.ContainsKey(Router.RoutingSlipHeaderKey).ShouldBeFalse();
+            bus.CurrentMessageContext.Headers.ContainsKey(Router.RoutingSlipHeaderKey).ShouldBeFalse();
 
             routingSlip.Itinerary.Count.ShouldEqual(2);
             routingSlip.Log.Count.ShouldEqual(0);
 
-            var nextDestination = Address.Parse("bar");
-            A.CallTo(() => sender.Send(message, nextDestination)).MustNotHaveHappened();
+            bus.Forwarded.Count().ShouldEqual(0);
         }
     }
 }

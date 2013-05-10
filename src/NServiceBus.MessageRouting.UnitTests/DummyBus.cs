@@ -25,6 +25,8 @@ namespace NServiceBus.MessageRouting.UnitTests
 
         private readonly Queue<DeferredMessage> deferredMessages = new Queue<DeferredMessage>();
 
+        private readonly List<string> forwardedMessages = new List<string>();
+
         private readonly List<Tuple<Func<object>, Func<object, bool>>> sentLocalHandlers = new List<Tuple<Func<object>, Func<object, bool>>>();
 
         private readonly List<Tuple<Func<object>, Func<object, bool>>> deferHandlers = new List<Tuple<Func<object>, Func<object, bool>>>();
@@ -85,6 +87,8 @@ namespace NServiceBus.MessageRouting.UnitTests
                 return this.repliedMessages;
             }
         }
+
+        public IEnumerable<string> Forwarded { get { return forwardedMessages; } } 
 
         public IEnumerable<Tuple<string, object>> ExplicitlySent
         {
@@ -326,7 +330,7 @@ namespace NServiceBus.MessageRouting.UnitTests
 
         public void ForwardCurrentMessageTo(string destination)
         {
-            throw new NotImplementedException();
+            forwardedMessages.Add(destination);
         }
 
         public void DoNotContinueDispatchingCurrentMessageToHandlers()

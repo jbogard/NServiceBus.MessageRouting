@@ -1,6 +1,7 @@
 using System;
 using NServiceBus.MessageRouting.RoutingSlips.Samples.Messages;
 using log4net;
+using NServiceBus.Diagnostics;
 
 namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender 
 {
@@ -18,7 +19,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
     {
         public void Init()
         {
-            Configure.Instance.RoutingSlips();
+            Configure.Instance.RoutingSlips().Diagnostics();
 
             SetLoggingLibrary.Log4Net();
         }

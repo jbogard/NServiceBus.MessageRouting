@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using NServiceBus.Unicast.Queuing;
 using NServiceBus.Unicast.Transport;
 using Newtonsoft.Json;
 
@@ -11,12 +10,10 @@ namespace NServiceBus.MessageRouting.RoutingSlips
         public const string RoutingSlipHeaderKey = "NServiceBus.MessageRouting.RoutingSlips.RoutingSlip";
 
         private readonly IBus _bus;
-        private readonly ISendMessages _messageSender;
 
-        public Router(IBus bus, ISendMessages messageSender)
+        public Router(IBus bus)
         {
             _bus = bus;
-            _messageSender = messageSender;
         }
 
         public void SendToFirstStep(object message, RoutingSlip routingSlip)
@@ -30,7 +27,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             _bus.Send(firstRouteDefinition.Address, message);
         }
 
-        public void SendToNextStep(TransportMessage message, Exception ex, RoutingSlip routingSlip)
+        public void SendToNextStep(Exception ex, RoutingSlip routingSlip)
         {
             if (ex != null)
                 return;
@@ -53,11 +50,8 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
             var json = JsonConvert.SerializeObject(routingSlip);
 
-            message.Headers[RoutingSlipHeaderKey] = json;
-
-            var address = Address.Parse(nextStep.Address);
-
-            _messageSender.Send(message, address);
+            _bus.CurrentMessageContext.Headers[RoutingSlipHeaderKey] = json;
+            _bus.ForwardCurrentMessageTo(nextStep.Address);
         }
     }
 }
