@@ -4,7 +4,7 @@
     {
          public static Configure Diagnostics(this Configure configure)
          {
-             configure.Configurer.ConfigureComponent<Raiser>(DependencyLifecycle.SingleInstance);
+             configure.Configurer.ConfigureComponent<MessageProducer>(DependencyLifecycle.SingleInstance);
              return configure;
          }
     }

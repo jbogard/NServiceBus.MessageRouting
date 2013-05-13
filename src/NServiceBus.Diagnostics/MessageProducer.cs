@@ -1,56 +1,23 @@
-﻿using System.IO;
-using System.Runtime.Serialization;
+﻿using System;
+using System.IO;
 using System.ServiceModel;
 using NServiceBus.MessageMutator;
 using NServiceBus.Serialization;
 using Newtonsoft.Json;
+using log4net;
 
 namespace NServiceBus.Diagnostics
 {
-    [DataContract]
-    public class MessageReceivedContract
+    public class MessageProducer : IMutateIncomingMessages, IMutateOutgoingMessages
     {
-        [DataMember]
-        public string Endpoint { get; set; }
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(BusListener));
 
-        [DataMember]
-        public string MessageJson { get; set; }
-
-        [DataMember]
-        public string MessageType { get; set; }
-    }
-
-    [DataContract]
-    public class MessageSentContract
-    {
-        [DataMember]
-        public string MessageJson { get; set; }
-
-        [DataMember]
-        public string MessageType { get; set; }
-    }
-
-    [ServiceContract]
-    public interface IBusListener
-    {
-        [OperationContract]
-        void MessageReceived(MessageReceivedContract message);
-
-        [OperationContract]
-        void MessageSent(MessageSentContract message);
-    }
-
-    public class Raiser : IMutateIncomingMessages, IMutateOutgoingMessages
-    {
         public IMessageSerializer Serializer { get; set; }
-        private readonly IBusListener pipeProxy;
         private readonly ChannelFactory<IBusListener> _pipeFactory;
 
-        public Raiser()
+        public MessageProducer()
         {
-            var uri = "net.pipe://localhost/NServiceBus.Diagnostics";
-
-            var namedPipes = Directory.GetFiles(@"\\.\pipe\");
+            var uri = "net.tcp://localhost:5050/NServiceBus.Diagnostics";
 
             //if (!namedPipes.Any(f => f.Contains("NServiceBus.Diagnostics"))) 
             //    return;
@@ -58,10 +25,9 @@ namespace NServiceBus.Diagnostics
             try
             {
                 var endpointAddress = new EndpointAddress(uri);
-                var binding = new NetNamedPipeBinding();
+                var binding = new NetTcpBinding();
                 _pipeFactory = new ChannelFactory<IBusListener>(binding, endpointAddress);
 
-                pipeProxy = _pipeFactory.CreateChannel();
             }
             catch (EndpointNotFoundException)
             {
@@ -72,8 +38,12 @@ namespace NServiceBus.Diagnostics
         {
             try
             {
+                var pipeProxy = _pipeFactory.CreateChannel();
                 if (pipeProxy == null || _pipeFactory.State != CommunicationState.Opened)
+                {
+                    Logger.Warn("Could not publish received message - connection closed.");
                     return message;
+                }
 
                 var json = JsonConvert.SerializeObject(message);
                 var type = message.GetType().FullName;
@@ -84,11 +54,17 @@ namespace NServiceBus.Diagnostics
                     MessageJson = json,
                     MessageType = type
                 };
-
+                Logger.Info("Published received message.");
                 pipeProxy.MessageReceived(contract);
             }
-            catch (EndpointNotFoundException) { }
-            catch (CommunicationObjectFaultedException) { }
+            catch (EndpointNotFoundException e)
+            {
+                Logger.Error("Unable to publish received message.", e);
+            }
+            catch (CommunicationObjectFaultedException e)
+            {
+                Logger.Error("Unable to publish received message.", e);
+            }
 
             return message;
         }
@@ -97,8 +73,12 @@ namespace NServiceBus.Diagnostics
         {
             try
             {
+                var pipeProxy = _pipeFactory.CreateChannel();
                 if (pipeProxy == null || _pipeFactory.State != CommunicationState.Opened)
+                {
+                    Logger.Warn("Could not publish sent message - connection closed.");
                     return message;
+                }
 
                 var json = JsonConvert.SerializeObject(message);
                 var contract = new MessageSentContract
@@ -106,10 +86,17 @@ namespace NServiceBus.Diagnostics
                     MessageJson = json,
                     MessageType = message.GetType().FullName
                 };
+                Logger.Info("Published sent message.");
                 pipeProxy.MessageSent(contract);
             }
-            catch (EndpointNotFoundException) { }
-            catch (CommunicationObjectFaultedException) { }
+            catch (EndpointNotFoundException e)
+            {
+                Logger.Error("Unable to publish received message.", e);
+            }
+            catch (CommunicationObjectFaultedException e)
+            {
+                Logger.Error("Unable to publish received message.", e);
+            }
 
             return message;
         }

@@ -1,0 +1,23 @@
+﻿using System;
+using System.ServiceModel;
+using log4net;
+
+namespace NServiceBus.Diagnostics
+{
+    [ServiceBehavior(IncludeExceptionDetailInFaults = true, InstanceContextMode = InstanceContextMode.Single)]
+    public class BusListener : IBusListener
+    {
+        public static event EventHandler<MessageReceivedContract> MessageReceivedEvent = (s, e) => { };
+        public static event EventHandler<MessageSentContract> MessageSentEvent = (s, e) => { };
+
+        public void MessageReceived(MessageReceivedContract message)
+        {
+            MessageReceivedEvent(this, message);
+        }
+
+        public void MessageSent(MessageSentContract message)
+        {
+            MessageSentEvent(this, message);
+        }
+    }
+}
