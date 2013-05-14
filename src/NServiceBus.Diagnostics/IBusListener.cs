@@ -6,6 +6,9 @@ namespace NServiceBus.Diagnostics
     public interface IBusListener
     {
         [OperationContract(IsOneWay = true)]
+        void BusStarted(BusStartedContract message);
+
+        [OperationContract(IsOneWay = true)]
         void MessageReceived(MessageReceivedContract message);
 
         [OperationContract(IsOneWay = true)]

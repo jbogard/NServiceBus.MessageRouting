@@ -20,6 +20,7 @@ namespace NServiceBus.Diagnostics
             {
                 BusListener.MessageReceivedEvent += (s, e) => Console.WriteLine("Received message at " + e.Endpoint);
                 BusListener.MessageSentEvent += (s, e) => Console.WriteLine("Sent message " + e.MessageType);
+                BusListener.BusStartedEvent += (s, e) => Console.WriteLine("Bus started " + e.Endpoint);
                 using (var host = new ServiceHost(_listener, new[] { new Uri("net.tcp://localhost:5050") }))
                 {
 

@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BusListener.cs" />
+    <Compile Include="BusStartedContract.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="IBusListener.cs" />
     <Compile Include="Listener.cs" />

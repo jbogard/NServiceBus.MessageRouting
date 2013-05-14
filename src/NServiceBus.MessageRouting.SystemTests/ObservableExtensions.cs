@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive.Linq;
 
 namespace NServiceBus.MessageRouting.SystemTests
@@ -10,6 +11,11 @@ namespace NServiceBus.MessageRouting.SystemTests
         {
             return source.Publish(co => co.TakeWhile(predicate)
                                           .Merge(co.SkipWhile(predicate).Take(1)));
+        }
+
+        public static void Enumerate<T>(this IEnumerable<T> items)
+        {
+            foreach (var item in items) { }
         }
     }
 }

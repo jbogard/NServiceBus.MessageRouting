@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Reactive.Linq;
-using NServiceBus.Diagnostics;
 using NServiceBus.MessageRouting.RoutingSlips;
 using NServiceBus.MessageRouting.RoutingSlips.Samples.Messages;
 using NUnit.Framework;

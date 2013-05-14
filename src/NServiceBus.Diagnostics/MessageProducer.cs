@@ -3,12 +3,13 @@ using System.IO;
 using System.ServiceModel;
 using NServiceBus.MessageMutator;
 using NServiceBus.Serialization;
+using NServiceBus.Unicast;
 using Newtonsoft.Json;
 using log4net;
 
 namespace NServiceBus.Diagnostics
 {
-    public class MessageProducer : IMutateIncomingMessages, IMutateOutgoingMessages
+    public class MessageProducer : IMutateIncomingMessages, IMutateOutgoingMessages, IWantToRunWhenTheBusStarts
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(BusListener));
 
@@ -99,6 +100,34 @@ namespace NServiceBus.Diagnostics
             }
 
             return message;
+        }
+
+        public void Run()
+        {
+            try
+            {
+                var pipeProxy = _pipeFactory.CreateChannel();
+                if (pipeProxy == null || _pipeFactory.State != CommunicationState.Opened)
+                {
+                    Logger.Warn("Could not publish started message - connection closed.");
+                    return;
+                }
+
+                var contract = new BusStartedContract
+                {
+                    Endpoint = Configure.EndpointName
+                };
+                Logger.Info("Published started message.");
+                pipeProxy.BusStarted(contract);
+            }
+            catch (EndpointNotFoundException e)
+            {
+                Logger.Error("Unable to publish started message.", e);
+            }
+            catch (CommunicationObjectFaultedException e)
+            {
+                Logger.Error("Unable to publish started message.", e);
+            }
         }
     }
 }

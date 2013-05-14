@@ -116,8 +116,20 @@ namespace NServiceBus.MessageRouting.SystemTests
                 }
                 Task.WaitAll(tasks.ToArray());
             });
+
+            var busStartedEvents = Observable
+                .FromEventPattern<BusStartedContract>(typeof (BusListener), "BusStartedEvent", Scheduler.Immediate)
+                .Take(serviceDirs.Length)
+                .TakeUntil(Observable.Timer(TimeSpan.FromSeconds(45)))
+                .Publish();
+
+            busStartedEvents.Subscribe();
+            busStartedEvents.Connect();
+
             _nonBlocking.Start();
-            _nonBlocking.Wait(45000);
+
+            busStartedEvents.ToEnumerable().Enumerate();
+            Console.WriteLine("Bus started confirmed.");
         }
 
         private static string GetServiceName(string servicePath)
