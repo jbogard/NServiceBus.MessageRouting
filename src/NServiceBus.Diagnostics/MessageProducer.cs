@@ -4,17 +4,22 @@ using System.ServiceModel;
 using NServiceBus.MessageMutator;
 using NServiceBus.Serialization;
 using NServiceBus.Unicast;
+using NServiceBus.UnitOfWork;
 using Newtonsoft.Json;
 using log4net;
 
 namespace NServiceBus.Diagnostics
 {
-    public class MessageProducer : IMutateIncomingMessages, IMutateOutgoingMessages, IWantToRunWhenTheBusStarts
+    public class MessageProducer : IMutateIncomingMessages, IMutateOutgoingMessages, IWantToRunWhenTheBusStarts, IManageUnitsOfWork
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(BusListener));
 
         public IMessageSerializer Serializer { get; set; }
+        public IBus Bus { get; set; }
         private readonly ChannelFactory<IBusListener> _pipeFactory;
+        
+        [ThreadStatic]
+        private static object _currentMessage;
 
         public MessageProducer()
         {
@@ -37,6 +42,8 @@ namespace NServiceBus.Diagnostics
 
         public object MutateIncoming(object message)
         {
+            _currentMessage = message;
+
             try
             {
                 var pipeProxy = _pipeFactory.CreateChannel();
@@ -127,6 +134,51 @@ namespace NServiceBus.Diagnostics
             catch (CommunicationObjectFaultedException e)
             {
                 Logger.Error("Unable to publish started message.", e);
+            }
+        }
+
+        public void Begin()
+        {
+        }
+
+        public void End(Exception ex = null)
+        {
+            try
+            {
+                if (ex == null)
+                    return;
+
+                var pipeProxy = _pipeFactory.CreateChannel();
+                if (pipeProxy == null || _pipeFactory.State != CommunicationState.Opened)
+                {
+                    Logger.Warn("Could not publish exception message - connection closed.");
+                    return;
+                }
+
+                var json = JsonConvert.SerializeObject(_currentMessage);
+
+                var contract = new MessageExceptionContract
+                {
+                    Endpoint = Configure.EndpointName,
+                    MessageJson = json,
+                    MessageType = _currentMessage.GetType().FullName,
+                    Exception = ex.ToString()
+                };
+                Logger.Info("Published exception message.");
+
+                pipeProxy.MessageException(contract);
+            }
+            catch (EndpointNotFoundException e)
+            {
+                Logger.Error("Unable to publish exception message.", e);
+            }
+            catch (CommunicationObjectFaultedException e)
+            {
+                Logger.Error("Unable to publish exception message.", e);
+            }
+            finally
+            {
+                _currentMessage = null;
             }
         }
     }

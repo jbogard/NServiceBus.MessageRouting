@@ -338,7 +338,7 @@ namespace NServiceBus.MessageRouting.UnitTests
             this.DoNotContinueDispatchingCurrentMessageToHandlersWasCalled = true;
         }
 
-        private static void DoNotCallThisMethod([CallerMemberName] string memberName = "")
+        private static void DoNotCallThisMethod(string memberName = "")
         {
             throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "You should not use {0} in production.", memberName));
         }

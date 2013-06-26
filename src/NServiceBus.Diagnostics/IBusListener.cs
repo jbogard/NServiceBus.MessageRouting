@@ -13,5 +13,8 @@ namespace NServiceBus.Diagnostics
 
         [OperationContract(IsOneWay = true)]
         void MessageSent(MessageSentContract message);
+
+        [OperationContract(IsOneWay = true)]
+        void MessageException(MessageExceptionContract message);
     }
 }

@@ -1,9 +1,10 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 
 namespace NServiceBus.Diagnostics
 {
     [DataContract]
-    public class MessageSentContract
+    public class MessageSentContract : EventArgs
     {
         [DataMember]
         public string MessageJson { get; set; }

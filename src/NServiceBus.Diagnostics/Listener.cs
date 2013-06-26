@@ -18,9 +18,10 @@ namespace NServiceBus.Diagnostics
             var token = _source.Token;
             _listenerTask = new Task(() =>
             {
-                BusListener.MessageReceivedEvent += (s, e) => Console.WriteLine("Received message at " + e.Endpoint);
+                BusListener.MessageReceivedEvent += (s, e) => Console.WriteLine("Received message at " + e.Endpoint + " of type " + e.MessageType);
                 BusListener.MessageSentEvent += (s, e) => Console.WriteLine("Sent message " + e.MessageType);
                 BusListener.BusStartedEvent += (s, e) => Console.WriteLine("Bus started " + e.Endpoint);
+                BusListener.MessageExceptionEvent += (s, e) => Console.WriteLine("Exception with message " + e.Endpoint + " for type " + e.MessageType + " with value " + e.Exception);
                 using (var host = new ServiceHost(_listener, new[] { new Uri("net.tcp://localhost:5050") }))
                 {
 

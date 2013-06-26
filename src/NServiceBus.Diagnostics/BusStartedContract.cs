@@ -1,9 +1,10 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 
 namespace NServiceBus.Diagnostics
 {
     [DataContract]
-    public class BusStartedContract
+    public class BusStartedContract : EventArgs
     {
         [DataMember]
         public string Endpoint { get; set; }
