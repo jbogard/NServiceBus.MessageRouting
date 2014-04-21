@@ -1,6 +1,5 @@
-﻿using System;
+﻿using NServiceBus.Logging;
 using NServiceBus.MessageRouting.RoutingSlips.Samples.Messages;
-using log4net;
 
 namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepA
 {

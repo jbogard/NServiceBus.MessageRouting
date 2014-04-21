@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FakeItEasy;
 using NServiceBus.MessageRouting.RoutingSlips;
+using NServiceBus.Transports;
 using NServiceBus.Unicast.Queuing;
 using NServiceBus.Unicast.Transport;
 using NUnit.Framework;
@@ -59,10 +60,8 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             var sender = A.Fake<ISendMessages>();
             var router = new Router(bus, sender);
 
-            var message = new TransportMessage
-            {
-                Headers = new Dictionary<string, string>()
-            };
+            var message = new TransportMessage();
+            
             router.SendToNextStep(message, null, routingSlip);
 
             message.Headers[Router.RoutingSlipHeaderKey].ShouldNotBeNull();
@@ -86,10 +85,8 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             var sender = A.Fake<ISendMessages>();
             var router = new Router(bus, sender);
 
-            var message = new TransportMessage
-            {
-                Headers = new Dictionary<string, string>()
-            };
+            var message = new TransportMessage();
+            
             router.SendToNextStep(message, null, routingSlip);
             
             message.Headers.Clear();
@@ -117,10 +114,8 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             var sender = A.Fake<ISendMessages>();
             var router = new Router(bus, sender);
 
-            var message = new TransportMessage
-            {
-                Headers = new Dictionary<string, string>()
-            };
+            var message = new TransportMessage();
+
             router.SendToNextStep(message, new Exception(), routingSlip);
 
             message.Headers.ContainsKey(Router.RoutingSlipHeaderKey).ShouldBeFalse();

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
-using NServiceBus.Unicast.Queuing;
-using NServiceBus.Unicast.Transport;
+using NServiceBus.Transports;
 using Newtonsoft.Json;
 
 namespace NServiceBus.MessageRouting.RoutingSlips
