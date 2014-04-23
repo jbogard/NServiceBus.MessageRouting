@@ -1,5 +1,5 @@
-﻿using NServiceBus.MessageRouting.RoutingSlips.Samples.Messages;
-using log4net;
+﻿using NServiceBus.Logging;
+using NServiceBus.MessageRouting.RoutingSlips.Samples.Messages;
 
 namespace NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost
 {

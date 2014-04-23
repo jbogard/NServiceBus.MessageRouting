@@ -1,16 +1,15 @@
 ﻿using System;
-using System.IO;
 using System.ServiceModel;
+using NServiceBus.Logging;
 using NServiceBus.MessageMutator;
 using NServiceBus.Serialization;
 using NServiceBus.Unicast;
 using NServiceBus.UnitOfWork;
 using Newtonsoft.Json;
-using log4net;
 
 namespace NServiceBus.Diagnostics
 {
-    public class MessageProducer : IMutateIncomingMessages, IMutateOutgoingMessages, IWantToRunWhenTheBusStarts, IManageUnitsOfWork
+    public class MessageProducer : IMutateIncomingMessages, IMutateOutgoingMessages, IWantToRunWhenBusStartsAndStops, IManageUnitsOfWork
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(BusListener));
 
@@ -23,7 +22,7 @@ namespace NServiceBus.Diagnostics
 
         public MessageProducer()
         {
-            var uri = "net.tcp://localhost:5050/NServiceBus.Diagnostics";
+            const string uri = "net.tcp://localhost:5050/NServiceBus.Diagnostics";
 
             //if (!namedPipes.Any(f => f.Contains("NServiceBus.Diagnostics"))) 
             //    return;
@@ -109,36 +108,9 @@ namespace NServiceBus.Diagnostics
             return message;
         }
 
-        public void Run()
-        {
-            try
-            {
-                var pipeProxy = _pipeFactory.CreateChannel();
-                if (pipeProxy == null || _pipeFactory.State != CommunicationState.Opened)
-                {
-                    Logger.Warn("Could not publish started message - connection closed.");
-                    return;
-                }
-
-                var contract = new BusStartedContract
-                {
-                    Endpoint = Configure.EndpointName
-                };
-                Logger.Info("Published started message.");
-                pipeProxy.BusStarted(contract);
-            }
-            catch (EndpointNotFoundException e)
-            {
-                Logger.Error("Unable to publish started message.", e);
-            }
-            catch (CommunicationObjectFaultedException e)
-            {
-                Logger.Error("Unable to publish started message.", e);
-            }
-        }
-
         public void Begin()
         {
+            
         }
 
         public void End(Exception ex = null)
@@ -180,6 +152,39 @@ namespace NServiceBus.Diagnostics
             {
                 _currentMessage = null;
             }
+        }
+
+        public void Start()
+        {
+            try
+            {
+                var pipeProxy = _pipeFactory.CreateChannel();
+                if (pipeProxy == null || _pipeFactory.State != CommunicationState.Opened)
+                {
+                    Logger.Warn("Could not publish started message - connection closed.");
+                    return;
+                }
+
+                var contract = new BusStartedContract
+                {
+                    Endpoint = Configure.EndpointName
+                };
+                Logger.Info("Published started message.");
+                pipeProxy.BusStarted(contract);
+            }
+            catch (EndpointNotFoundException e)
+            {
+                Logger.Error("Unable to publish started message.", e);
+            }
+            catch (CommunicationObjectFaultedException e)
+            {
+                Logger.Error("Unable to publish started message.", e);
+            }
+        }
+
+        public void Stop()
+        {
+            
         }
     }
 }

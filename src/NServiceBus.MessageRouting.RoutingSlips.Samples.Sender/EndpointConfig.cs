@@ -1,6 +1,6 @@
 using System;
+using NServiceBus.Logging;
 using NServiceBus.MessageRouting.RoutingSlips.Samples.Messages;
-using log4net;
 using NServiceBus.Diagnostics;
 
 namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender 
@@ -25,15 +25,15 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
         }
     }
 
-    public class Startup : IWantToRunAtStartup
+    public class Startup : IWantToRunWhenBusStartsAndStops
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Startup));
 
         public IBus Bus { get; set; }
 
-        public void Run()
+        public void Start()
         {
-            bool toggle = false;
+            var toggle = false;
 
             while (Console.ReadLine() != null)
             {
@@ -74,11 +74,11 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
 
                 toggle = !toggle;
             }
-
         }
 
         public void Stop()
         {
+
         }
     }
 

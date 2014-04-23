@@ -54,6 +54,8 @@ namespace NServiceBus.MessageRouting.UnitTests
             private set;
         }
 
+        public IInMemoryOperations InMemory { get; private set; }
+
         //public IInMemoryOperations InMemory { get; private set; }
 
         public IEnumerable<object> Published
@@ -105,7 +107,7 @@ namespace NServiceBus.MessageRouting.UnitTests
         public bool DoNotContinueDispatchingCurrentMessageToHandlersWasCalled { get; set; }
 
         public void SetupForSendLocal<TMessage>(
-            Func<IMessageHandler<TMessage>> handlerCreator)
+            Func<IHandleMessages<TMessage>> handlerCreator)
             where TMessage : class
         {
             this.sentLocalHandlers.Add(
@@ -114,7 +116,7 @@ namespace NServiceBus.MessageRouting.UnitTests
         }
 
         public void SetupForDefer<TMessage>(
-            Func<IMessageHandler<TMessage>> handlerCreator)
+            Func<IHandleMessages<TMessage>> handlerCreator)
             where TMessage : class
         {
             this.deferHandlers.Add(
@@ -145,6 +147,17 @@ namespace NServiceBus.MessageRouting.UnitTests
             {
                 this.publishedMessages.Enqueue(message);
             }
+        }
+
+        public void Publish<T>(T message)
+        {
+            publishedMessages.Enqueue(message);
+        }
+
+        public void Publish<T>()
+        {
+            var message = Activator.CreateInstance<T>();
+            publishedMessages.Enqueue(message);
         }
 
         public void Publish<T>(Action<T> messageConstructor)
@@ -189,6 +202,12 @@ namespace NServiceBus.MessageRouting.UnitTests
             return new Callback();
         }
 
+        public ICallback SendLocal(object message)
+        {
+            localMessages.Enqueue(message);
+            return new Callback();
+        }
+
         public ICallback SendLocal<T>(Action<T> messageConstructor)
         {
             var message = this.CreateInstance(messageConstructor);
@@ -209,6 +228,12 @@ namespace NServiceBus.MessageRouting.UnitTests
             return new Callback();
         }
 
+        public ICallback Send(object message)
+        {
+            sentMessages.Enqueue(message);
+            return new Callback();
+        }
+
         public ICallback Send<T>(Action<T> messageConstructor)
         {
             var message = this.CreateInstance(messageConstructor);
@@ -226,7 +251,20 @@ namespace NServiceBus.MessageRouting.UnitTests
             return new Callback();
         }
 
+        public ICallback Send(string destination, object message)
+        {
+            _explicitlySent.Enqueue(new Tuple<string, object>(destination, message));
+            return new Callback();
+        }
+
         public ICallback Send(Address address, params object[] messages)
+        {
+            DoNotCallThisMethod();
+
+            return new Callback();
+        }
+
+        public ICallback Send(Address address, object message)
         {
             DoNotCallThisMethod();
 
@@ -254,7 +292,21 @@ namespace NServiceBus.MessageRouting.UnitTests
             return new Callback();
         }
 
+        public ICallback Send(string destination, string correlationId, object message)
+        {
+            DoNotCallThisMethod();
+
+            return new Callback();
+        }
+
         public ICallback Send(Address address, string correlationId, params object[] messages)
+        {
+            DoNotCallThisMethod();
+
+            return new Callback();
+        }
+
+        public ICallback Send(Address address, string correlationId, object message)
         {
             DoNotCallThisMethod();
 
@@ -277,7 +329,16 @@ namespace NServiceBus.MessageRouting.UnitTests
 
         public ICallback SendToSites(IEnumerable<string> siteKeys, params object[] messages)
         {
-            throw new NotImplementedException();
+            DoNotCallThisMethod();
+
+            return new Callback();
+        }
+
+        public ICallback SendToSites(IEnumerable<string> siteKeys, object message)
+        {
+            DoNotCallThisMethod();
+
+            return new Callback();
         }
 
         public ICallback Defer(TimeSpan delay, params object[] messages)
@@ -289,6 +350,12 @@ namespace NServiceBus.MessageRouting.UnitTests
                 this.DynamicInvokeTimeout(message, this.deferHandlers);
             }
 
+            return new Callback();
+        }
+
+        public ICallback Defer(TimeSpan delay, object message)
+        {
+            deferredMessages.Enqueue(new DeferredMessage(message, delay));
             return new Callback();
         }
 
@@ -304,12 +371,23 @@ namespace NServiceBus.MessageRouting.UnitTests
             return new Callback();
         }
 
+        public ICallback Defer(DateTime processAt, object message)
+        {
+            deferredMessages.Enqueue(new DeferredMessage(message, processAt));
+            return new Callback();
+        }
+
         public void Reply(params object[] messages)
         {
             foreach (var message in messages)
             {
-                this.repliedMessages.Enqueue(message);
+                Reply(message);
             }
+        }
+
+        public void Reply(object message)
+        {
+            repliedMessages.Enqueue(message);
         }
 
         public void Reply<T>(Action<T> messageConstructor)
@@ -460,6 +538,20 @@ namespace NServiceBus.MessageRouting.UnitTests
         public DeferredMessage(IEnumerable<object> message, TimeSpan executionTimeSpan)
         {
             this.AddRange(message);
+
+            this.ExecutionTimeSpan = executionTimeSpan;
+        }
+
+        public DeferredMessage(object message, DateTime excecutionTime)
+        {
+            this.Add(message);
+
+            this.ExecutionDate = excecutionTime;
+        }
+
+        public DeferredMessage(object message, TimeSpan executionTimeSpan)
+        {
+            this.Add(message);
 
             this.ExecutionTimeSpan = executionTimeSpan;
         }
