@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using NServiceBus.Unicast.Transport;
 using Newtonsoft.Json;
 
 namespace NServiceBus.MessageRouting.RoutingSlips
@@ -22,7 +21,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
             var json = JsonConvert.SerializeObject(routingSlip);
 
-            _bus.OutgoingHeaders[RoutingSlipHeaderKey] = json;
+            _bus.SetMessageHeader(message, RoutingSlipHeaderKey, json);
 
             _bus.Send(firstRouteDefinition.Address, message);
         }

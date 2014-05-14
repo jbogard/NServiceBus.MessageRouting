@@ -40,7 +40,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             var message = new DummyMessage();
             router.SendToFirstStep(message, routingSlip);
 
-            bus.OutgoingHeaders[Router.RoutingSlipHeaderKey].ShouldNotBeNull();
+            bus.GetMessageHeader(message, Router.RoutingSlipHeaderKey).ShouldNotBeNull();
             bus.ExplicitlySent.Count().ShouldEqual(1);
             bus.ExplicitlySent.First().Item1.ShouldEqual("foo");
             bus.ExplicitlySent.First().Item2.ShouldEqual(message);
