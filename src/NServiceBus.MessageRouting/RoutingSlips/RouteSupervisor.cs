@@ -6,53 +6,43 @@ using Newtonsoft.Json;
 
 namespace NServiceBus.MessageRouting.RoutingSlips
 {
-    public interface IRouteSupervisor
-    {
-        RoutingSlip RoutingSlip { get; }
-    }
+    using Pipeline;
+    using Pipeline.Contexts;
 
-    public class RouteSupervisor : IManageUnitsOfWork, IMutateIncomingTransportMessages, IRouteSupervisor
+    public class RouteSupervisor : IBehavior<IncomingContext>
     {
         private readonly IRouter _router;
-        private readonly IBus _bus;
-
-        [ThreadStatic]
-        private static RoutingSlip _routingSlip;
-
-        public RoutingSlip RoutingSlip { get { return _routingSlip; } }
-
-        public RouteSupervisor(IRouter router, IBus bus)
+        public RouteSupervisor(IRouter router)
         {
             _router = router;
-            _bus = bus;
         }
 
-        public void Begin()
-        {
-        }
-
-        public void End(Exception ex)
-        {
-            if (_routingSlip == null)
-                return;
-
-            try
-            {
-                _router.SendToNextStep(ex, _routingSlip);
-            }
-            finally
-            {
-                _routingSlip = null;
-            }
-        }
-
-        public void MutateIncoming(TransportMessage message)
+        public void Invoke(IncomingContext context, Action next)
         {
             string routingSlipJson;
 
-            if (_bus.CurrentMessageContext.Headers.TryGetValue(Router.RoutingSlipHeaderKey, out routingSlipJson))
+            if (context.IncomingLogicalMessage.Headers.TryGetValue(Router.RoutingSlipHeaderKey, out routingSlipJson))
             {
-                _routingSlip = JsonConvert.DeserializeObject<RoutingSlip>(routingSlipJson);
+                var routingSlip = JsonConvert.DeserializeObject<RoutingSlip>(routingSlipJson);
+
+                context.Set(routingSlip);
+
+                next();
+
+                _router.SendToNextStep(routingSlip);
+            }
+            else
+            {
+                next();
+            }
+
+        }
+
+        public class Registration : RegisterStep
+        {
+            public Registration() : base("RoutingSlip", typeof(RouteSupervisor), "Awesome sauce")
+            {
+                InsertBefore(WellKnownStep.LoadHandlers);
             }
         }
     }

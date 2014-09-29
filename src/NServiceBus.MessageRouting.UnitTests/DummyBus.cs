@@ -524,6 +524,11 @@ namespace NServiceBus.MessageRouting.UnitTests
                 callback(default(T));
             }
         }
+
+        public void Dispose()
+        {
+            
+        }
     }
 
     public class DeferredMessage : List<object>

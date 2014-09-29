@@ -54,7 +54,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             var bus = new Bus();
             var router = new Router(bus);
 
-            router.SendToNextStep(null, routingSlip);
+            router.SendToNextStep(routingSlip);
 
             bus.CurrentMessageContext.Headers[Router.RoutingSlipHeaderKey].ShouldNotBeNull();
 
@@ -74,11 +74,11 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             var bus = new Bus();
             var router = new Router(bus);
 
-            router.SendToNextStep(null, routingSlip);
+            router.SendToNextStep(routingSlip);
             
             bus.CurrentMessageContext.Headers.Clear();
             
-            router.SendToNextStep(null, routingSlip);
+            router.SendToNextStep(routingSlip);
 
             bus.CurrentMessageContext.Headers.ContainsKey(Router.RoutingSlipHeaderKey).ShouldBeFalse();
 
@@ -88,25 +88,6 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
 
             bus.Forwarded.Count().ShouldEqual(1);
 
-        }
-
-
-        [Test]
-        public void Should_not_send_to_next_destination_if_error()
-        {
-            var routingSlip = new RoutingSlipBuilder().CreateRoutingSlip(Guid.NewGuid(), "foo", "bar");
-
-            var bus = new Bus();
-            var router = new Router(bus);
-
-            router.SendToNextStep(new Exception(), routingSlip);
-
-            bus.CurrentMessageContext.Headers.ContainsKey(Router.RoutingSlipHeaderKey).ShouldBeFalse();
-
-            routingSlip.Itinerary.Count.ShouldEqual(2);
-            routingSlip.Log.Count.ShouldEqual(0);
-
-            bus.Forwarded.Count().ShouldEqual(0);
         }
     }
 }

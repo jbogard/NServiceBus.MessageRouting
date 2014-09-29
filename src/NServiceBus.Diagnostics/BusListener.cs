@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ServiceModel;
-using log4net;
 
 namespace NServiceBus.Diagnostics
 {

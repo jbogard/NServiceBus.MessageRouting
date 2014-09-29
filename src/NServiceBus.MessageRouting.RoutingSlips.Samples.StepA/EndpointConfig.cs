@@ -1,5 +1,3 @@
-using NServiceBus.Diagnostics;
-
 namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepA 
 {
     using NServiceBus;
@@ -10,14 +8,10 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepA
 	*/
     public class EndpointConfig : IConfigureThisEndpoint, AsA_Server
     {
-    }
-
-    public class Startup : IWantCustomInitialization
-    {
-        public void Init()
+        public void Customize(BusConfiguration configuration)
         {
-            Configure.Instance.RoutingSlips().Diagnostics();
-            SetLoggingLibrary.Log4Net();
+            configuration.RoutingSlips();
+            configuration.UsePersistence<InMemoryPersistence>();
         }
     }
 }

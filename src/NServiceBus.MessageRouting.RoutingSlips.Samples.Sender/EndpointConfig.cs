@@ -1,7 +1,6 @@
 using System;
 using NServiceBus.Logging;
 using NServiceBus.MessageRouting.RoutingSlips.Samples.Messages;
-using NServiceBus.Diagnostics;
 
 namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender 
 {
@@ -13,15 +12,10 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
 	*/
     public class EndpointConfig : IConfigureThisEndpoint, AsA_Server
     {
-    }
-
-    public class RoutingConfiguration : IWantCustomInitialization
-    {
-        public void Init()
+        public void Customize(BusConfiguration configuration)
         {
-            Configure.Instance.RoutingSlips().Diagnostics();
-
-            SetLoggingLibrary.Log4Net();
+            configuration.RoutingSlips();
+            configuration.UsePersistence<InMemoryPersistence>();
         }
     }
 

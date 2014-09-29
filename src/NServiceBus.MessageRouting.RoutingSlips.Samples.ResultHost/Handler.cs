@@ -7,14 +7,13 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Handler));
         public IBus Bus { get; set; }
+        public RoutingSlip RoutingSlip { get; set; }
 
         public void Handle(SequentialProcess message)
         {
-            var routingSlip = Bus.GetRoutingSlipFromCurrentMessage();
-
             Logger.Info("Received message for sequential process.");
 
-            foreach (var routeDefinition in routingSlip.Log)
+            foreach (var routeDefinition in RoutingSlip.Log)
             {
                 Logger.Info("Executed step at endpoint " + routeDefinition.Address);
             }

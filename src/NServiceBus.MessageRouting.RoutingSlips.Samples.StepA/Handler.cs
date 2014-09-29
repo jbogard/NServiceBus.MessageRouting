@@ -7,13 +7,13 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepA
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Handler));
         public IBus Bus { get; set; }
+        public RoutingSlip RoutingSlip { get; set; }
 
         public void Handle(SequentialProcess message)
         {
             Logger.Info(message.StepAInfo);
-            var slip = Bus.GetRoutingSlipFromCurrentMessage();
 
-            slip.Attachments["Foo"] = "Bar";
+            RoutingSlip.Attachments["Foo"] = "Bar";
         }
     }
 }

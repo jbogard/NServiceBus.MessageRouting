@@ -2,20 +2,21 @@
 
 namespace NServiceBus.MessageRouting.RoutingSlips
 {
+    using Pipeline;
+
     public static class RoutableMessageBusExtensions
     {
-        public static Configure RoutingSlips(this Configure configure)
+        public static BusConfiguration RoutingSlips(this BusConfiguration configure)
         {
-            configure.Configurer.ConfigureComponent<Router>(DependencyLifecycle.SingleInstance);
-            configure.Configurer.ConfigureComponent<RouteSupervisor>(DependencyLifecycle.SingleInstance);
-            configure.Configurer.ConfigureComponent<RoutingSlipBuilder>(DependencyLifecycle.SingleInstance);
+            configure.RegisterComponents(cfg =>
+            {
+                cfg.ConfigureComponent<Router>(DependencyLifecycle.SingleInstance);
+                cfg.ConfigureComponent(b => b.Build<PipelineExecutor>().CurrentContext.Get<RoutingSlip>(), DependencyLifecycle.InstancePerCall);
+                cfg.ConfigureComponent<RoutingSlipBuilder>(DependencyLifecycle.SingleInstance);
+            });
+            configure.Pipeline.Register<RouteSupervisor.Registration>();
 
             return configure;
-        }
-
-        public static RoutingSlip GetRoutingSlipFromCurrentMessage(this IBus bus)
-        {
-            return Configure.Instance.Builder.Build<IRouteSupervisor>().RoutingSlip;
         }
 
         public static void Route(this IBus bus, object message, params string[] destinations)
@@ -29,7 +30,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             
             var routingSlip = builder.CreateRoutingSlip(routingSlipId, destinations);
 
-            var router = Configure.Instance.Builder.Build<IRouter>();
+            var router = new Router(bus);
 
             router.SendToFirstStep(message, routingSlip);
         }

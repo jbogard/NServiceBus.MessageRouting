@@ -26,11 +26,8 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             _bus.Send(firstRouteDefinition.Address, message);
         }
 
-        public void SendToNextStep(Exception ex, RoutingSlip routingSlip)
+        public void SendToNextStep(RoutingSlip routingSlip)
         {
-            if (ex != null)
-                return;
-
             var currentStep = routingSlip.Itinerary.First();
             
             routingSlip.Itinerary.RemoveAt(0);
