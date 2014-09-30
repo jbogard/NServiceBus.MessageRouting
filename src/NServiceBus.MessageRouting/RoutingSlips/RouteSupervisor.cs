@@ -40,7 +40,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
         public class Registration : RegisterStep
         {
-            public Registration() : base("RoutingSlip", typeof(RouteSupervisor), "Awesome sauce")
+            public Registration() : base("RoutingSlip", typeof(RouteSupervisor), "Unpacks routing slip and forwards message to next destination")
             {
                 InsertBefore(WellKnownStep.LoadHandlers);
             }
