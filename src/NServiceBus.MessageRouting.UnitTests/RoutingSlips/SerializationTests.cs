@@ -12,8 +12,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
         [Test]
         public void Should_be_able_to_serialize()
         {
-            var builder = new RoutingSlipBuilder();
-            var routingSlip = builder.CreateRoutingSlip(Guid.NewGuid(), "foo", "bar");
+            var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo", "bar");
             routingSlip.Log.Add(new ProcessingStepResult { Address = "baz" });
 
             var result = JsonConvert.SerializeObject(routingSlip);

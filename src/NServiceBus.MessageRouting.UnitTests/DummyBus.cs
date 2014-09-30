@@ -11,7 +11,7 @@ namespace NServiceBus.MessageRouting.UnitTests
 {
     // Infrastructure
 
-    public class Bus : IBus
+    public class Bus : IBus, IManageMessageHeaders
     {
         private readonly Queue<object> publishedMessages = new Queue<object>();
 
@@ -529,6 +529,16 @@ namespace NServiceBus.MessageRouting.UnitTests
         {
             
         }
+
+        public Action<object, string, string> SetHeaderAction { get
+        {
+            return (msg, header, value) => CurrentMessageContext.Headers[header] = value;
+        } }
+
+        public Func<object, string, string> GetHeaderAction { get
+        {
+            return (msg, header) => CurrentMessageContext.Headers[header];
+        } }
     }
 
     public class DeferredMessage : List<object>

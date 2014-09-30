@@ -12,7 +12,6 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             {
                 cfg.ConfigureComponent<Router>(DependencyLifecycle.SingleInstance);
                 cfg.ConfigureComponent(b => b.Build<PipelineExecutor>().CurrentContext.Get<RoutingSlip>(), DependencyLifecycle.InstancePerCall);
-                cfg.ConfigureComponent<RoutingSlipBuilder>(DependencyLifecycle.SingleInstance);
             });
             configure.Pipeline.Register<RouteSupervisor.Registration>();
 
@@ -26,9 +25,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
         public static void Route(this IBus bus, object message, Guid routingSlipId, params string[] destinations)
         {
-            var builder = new RoutingSlipBuilder();
-            
-            var routingSlip = builder.CreateRoutingSlip(routingSlipId, destinations);
+            var routingSlip = new RoutingSlip(routingSlipId, destinations);
 
             var router = new Router(bus);
 

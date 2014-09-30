@@ -5,11 +5,21 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 {
     public class RoutingSlip
     {
-        public RoutingSlip()
+        private RoutingSlip()
         {
             Attachments = new Dictionary<string, string>();
             Itinerary = new List<ProcessingStep>();
             Log = new List<ProcessingStepResult>();
+        }
+
+        public RoutingSlip(Guid id, params string[] destinations) : this()
+        {
+            Id = id;
+            destinations = destinations ?? new string[0];
+            foreach (var destination in destinations)
+            {
+                Itinerary.Add(new ProcessingStep { Address = destination });
+            }
         }
 
         public Guid Id { get; set; }

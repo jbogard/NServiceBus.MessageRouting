@@ -17,11 +17,9 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
         [Test]
         public void Should_build_routing_slip()
         {
-            var builder = new RoutingSlipBuilder();
-
             var routingSlipId = Guid.NewGuid();
 
-            RoutingSlip routingSlip = builder.CreateRoutingSlip(routingSlipId, "foo");
+            var routingSlip = new RoutingSlip(routingSlipId, "foo");
 
             routingSlip.ShouldNotBeNull();
             routingSlip.Id.ShouldEqual(routingSlipId);
@@ -32,7 +30,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
         [Test]
         public void Should_send_to_first_destination()
         {
-            var routingSlip = new RoutingSlipBuilder().CreateRoutingSlip(Guid.NewGuid(), "foo");
+            var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo");
 
             var bus = new Bus();
             var router = new Router(bus);
@@ -49,7 +47,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
         [Test]
         public void Should_send_to_next_destination_if_no_error()
         {
-            var routingSlip = new RoutingSlipBuilder().CreateRoutingSlip(Guid.NewGuid(), "foo", "bar");
+            var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo", "bar");
 
             var bus = new Bus();
             var router = new Router(bus);
@@ -69,7 +67,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
         [Test]
         public void Should_complete_route()
         {
-            var routingSlip = new RoutingSlipBuilder().CreateRoutingSlip(Guid.NewGuid(), "foo", "bar");
+            var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo", "bar");
 
             var bus = new Bus();
             var router = new Router(bus);

@@ -60,14 +60,12 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RoutingSlips\IRouter.cs" />
-    <Compile Include="RoutingSlips\IRoutingSlipBuilder.cs" />
     <Compile Include="RoutingSlips\ProcessingStep.cs" />
     <Compile Include="RoutingSlips\ProcessingStepResult.cs" />
     <Compile Include="RoutingSlips\RoutableMessageBusExtensions.cs" />
     <Compile Include="RoutingSlips\Router.cs" />
     <Compile Include="RoutingSlips\RouteSupervisor.cs" />
     <Compile Include="RoutingSlips\RoutingSlip.cs" />
-    <Compile Include="RoutingSlips\RoutingSlipBuilder.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
