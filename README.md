@@ -22,6 +22,6 @@ Then kick off the process by sending a message and including the list of destina
     
 Each endpoint needs to include a handler for the message. Optionally, each endpoint can inspect/modify routing slip attachments:
 
-    Bus.GetRoutingSlipFromCurrentMessage().Attachments["FraudResult"] = "Declined";
+    Bus.RoutingSlip().Attachments["FraudResult"] = "Declined";
     
 That's all there is to it!

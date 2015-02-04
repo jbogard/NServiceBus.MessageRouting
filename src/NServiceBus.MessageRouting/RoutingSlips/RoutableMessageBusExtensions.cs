@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace NServiceBus.MessageRouting.RoutingSlips
 {
@@ -30,6 +31,14 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             var router = new Router(bus);
 
             router.SendToFirstStep(message, routingSlip);
+        }
+
+        public static RoutingSlip RoutingSlip(this IBus bus)
+        {
+            string routingSlip;
+            if (bus.CurrentMessageContext.Headers.TryGetValue(Router.RoutingSlipHeaderKey, out routingSlip))
+                return JsonConvert.DeserializeObject<RoutingSlip>(routingSlip);
+            return null;
         }
     }
 }
