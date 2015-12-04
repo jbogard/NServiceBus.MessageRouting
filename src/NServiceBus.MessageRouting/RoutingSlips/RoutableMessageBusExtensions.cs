@@ -1,35 +1,30 @@
 ﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace NServiceBus.MessageRouting.RoutingSlips
 {
-    using Pipeline;
-
     public static class RoutableMessageBusExtensions
     {
-        public static BusConfiguration RoutingSlips(this BusConfiguration configure)
+        public static async Task Route(this IBusContext bus, object message, params string[] destinations)
         {
-            configure.RegisterComponents(cfg =>
-            {
-                cfg.ConfigureComponent<Router>(DependencyLifecycle.SingleInstance);
-                cfg.ConfigureComponent(b => b.Build<PipelineExecutor>().CurrentContext.Get<RoutingSlip>(), DependencyLifecycle.InstancePerCall);
-            });
-            configure.Pipeline.Register<RouteSupervisor.Registration>();
-
-            return configure;
+            await bus.Route(message, Guid.NewGuid(), destinations);
         }
 
-        public static void Route(this IBus bus, object message, params string[] destinations)
-        {
-            bus.Route(message, Guid.NewGuid(), destinations);
-        }
-
-        public static void Route(this IBus bus, object message, Guid routingSlipId, params string[] destinations)
+        public static async Task Route(this IBusContext bus, object message, Guid routingSlipId, params string[] destinations)
         {
             var routingSlip = new RoutingSlip(routingSlipId, destinations);
 
-            var router = new Router(bus);
+            var firstRouteDefinition = routingSlip.Itinerary.First();
 
-            router.SendToFirstStep(message, routingSlip);
+            var json = JsonConvert.SerializeObject(routingSlip);
+
+            var options = new SendOptions();
+            options.SetHeader(Router.RoutingSlipHeaderKey, json);
+            options.SetDestination(firstRouteDefinition.Address);
+
+            await bus.Send(message, options);
         }
     }
 }

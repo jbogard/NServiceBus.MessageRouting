@@ -1,79 +1,86 @@
-using System;
-using NServiceBus.Logging;
-using NServiceBus.MessageRouting.RoutingSlips.Samples.Messages;
 
-namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender 
+namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
 {
+    using System;
+    using System.Threading.Tasks;
+    using Messages;
     using NServiceBus;
+    using NServiceBus.Logging;
 
-	/*
-		This class configures this endpoint as a Server. More information about how to configure the NServiceBus host
-		can be found here: http://nservicebus.com/GenericHost.aspx
-	*/
-    public class EndpointConfig : IConfigureThisEndpoint, AsA_Server
+    class Program
     {
-        public void Customize(BusConfiguration configuration)
+
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(Program));
+
+        static void Main(string[] args)
         {
-            configuration.RoutingSlips();
-            configuration.UsePersistence<InMemoryPersistence>();
+            RunBus().GetAwaiter().GetResult();
         }
-    }
 
-    public class Startup : IWantToRunWhenBusStartsAndStops
-    {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(Startup));
-
-        public IBus Bus { get; set; }
-
-        public void Start()
+        static async Task RunBus()
         {
-            var toggle = false;
-
-            while (Console.ReadLine() != null)
+            IEndpointInstance endpoint = null;
+            try
             {
-                if (toggle)
+                LogManager.Use<DefaultFactory>();
+
+                var configuration = new BusConfiguration();
+                configuration.EndpointName("NServiceBus.MessageRouting.RoutingSlips.Samples.Sender");
+
+                configuration.UseTransport<MsmqTransport>();
+                configuration.UsePersistence<InMemoryPersistence>();
+                configuration.EnableFeature<RoutingSlips>();
+
+                endpoint = await Endpoint.Start(configuration);
+
+                var bus = endpoint.CreateBusContext();
+
+                var toggle = false;
+
+                while (Console.ReadLine() != null)
                 {
-                    var messageABC = new SequentialProcess
+                    if (toggle)
                     {
-                        StepAInfo = "Foo",
-                        StepBInfo = "Bar",
-                        StepCInfo = "Baz",
-                    };
+                        var messageABC = new SequentialProcess
+                        {
+                            StepAInfo = "Foo",
+                            StepBInfo = "Bar",
+                            StepCInfo = "Baz",
+                        };
 
-                    Logger.Info("Sending message for step A, B, C");
-                    Bus.Route(messageABC, Guid.NewGuid(), new[]
+                        Logger.Info("Sending message for step A, B, C");
+                        await bus.Route(messageABC, Guid.NewGuid(), new[]
+                        {
+                            "NServiceBus.MessageRouting.RoutingSlips.Samples.StepA",
+                            "NServiceBus.MessageRouting.RoutingSlips.Samples.StepB",
+                            "NServiceBus.MessageRouting.RoutingSlips.Samples.StepC",
+                            "NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost",
+                        });
+                    }
+                    else
                     {
-                        "NServiceBus.MessageRouting.RoutingSlips.Samples.StepA",
-                        "NServiceBus.MessageRouting.RoutingSlips.Samples.StepB",
-                        "NServiceBus.MessageRouting.RoutingSlips.Samples.StepC",
-                        "NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost",
-                    });
+                        var messageAC = new SequentialProcess
+                        {
+                            StepAInfo = "Foo",
+                            StepCInfo = "Baz",
+                        };
+
+                        Logger.Info("Sending message for step A, C");
+                        await bus.Route(messageAC, Guid.NewGuid(), new[]
+                        {
+                            "NServiceBus.MessageRouting.RoutingSlips.Samples.StepA",
+                            "NServiceBus.MessageRouting.RoutingSlips.Samples.StepC",
+                            "NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost",
+                        });
+                    }
+
+                    toggle = !toggle;
                 }
-                else
-                {
-                    var messageAC = new SequentialProcess
-                    {
-                        StepAInfo = "Foo",
-                        StepCInfo = "Baz",
-                    };
-
-                    Logger.Info("Sending message for step A, C");
-                    Bus.Route(messageAC, Guid.NewGuid(), new[]
-                    {
-                        "NServiceBus.MessageRouting.RoutingSlips.Samples.StepA",
-                        "NServiceBus.MessageRouting.RoutingSlips.Samples.StepC",
-                        "NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost",
-                    });
-                }
-
-                toggle = !toggle;
+            }
+            finally
+            {
+                await endpoint.Stop();
             }
         }
-
-        public void Stop()
-        {
-
-        }
     }
-
 }

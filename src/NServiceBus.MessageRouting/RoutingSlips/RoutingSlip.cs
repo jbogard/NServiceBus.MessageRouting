@@ -22,10 +22,10 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             }
         }
 
-        public Guid Id { get; set; }
-        public IDictionary<string, string> Attachments { get; private set; }
+        public Guid Id { get; }
+        public IDictionary<string, string> Attachments { get; }
 
-        public IList<ProcessingStep> Itinerary { get; private set; }
-        public IList<ProcessingStepResult> Log { get; private set; }
+        public IList<ProcessingStep> Itinerary { get; }
+        public IList<ProcessingStepResult> Log { get; }
     }
 }

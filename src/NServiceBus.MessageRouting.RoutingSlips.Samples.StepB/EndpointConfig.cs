@@ -1,16 +1,41 @@
+
 namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepB
 {
-    /*
-		This class configures this endpoint as a Server. More information about how to configure the NServiceBus host
-		can be found here: http://nservicebus.com/GenericHost.aspx
-	*/
+    using System;
+    using System.Threading.Tasks;
+    using Messages;
+    using NServiceBus;
+    using NServiceBus.Logging;
 
-    public class EndpointConfig : IConfigureThisEndpoint, AsA_Server
+    class Program
     {
-        public void Customize(BusConfiguration configuration)
+        static void Main(string[] args)
         {
-            configuration.RoutingSlips();
-            configuration.UsePersistence<InMemoryPersistence>();
+            RunBus().GetAwaiter().GetResult();
+        }
+
+        static async Task RunBus()
+        {
+            IEndpointInstance endpoint = null;
+            try
+            {
+                LogManager.Use<DefaultFactory>();
+
+                var configuration = new BusConfiguration();
+                configuration.EndpointName("NServiceBus.MessageRouting.RoutingSlips.Samples.StepB");
+
+                configuration.UseTransport<MsmqTransport>();
+                configuration.UsePersistence<InMemoryPersistence>();
+                configuration.EnableFeature<RoutingSlips>();
+
+                endpoint = await Endpoint.Start(configuration);
+
+                Console.ReadLine();
+            }
+            finally
+            {
+                await endpoint.Stop();
+            }
         }
     }
 }

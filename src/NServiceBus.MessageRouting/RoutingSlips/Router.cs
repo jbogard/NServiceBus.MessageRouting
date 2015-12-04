@@ -1,40 +1,46 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
+using NServiceBus.Features;
+using NServiceBus.Pipeline;
+using NServiceBus.Pipeline.Contexts;
+using NServiceBus.Transports;
 
 namespace NServiceBus.MessageRouting.RoutingSlips
 {
-    public class Router : IRouter
+    public class Router : Behavior<InvokeHandlerContext>
     {
-        public const string RoutingSlipHeaderKey = "NServiceBus.MessageRouting.RoutingSlips.RoutingSlip";
+        public const string RoutingSlipHeaderKey = "NServiceBus.MessageRouting.RoutingSlips.Router";
 
-        private readonly IBus _bus;
-
-        public Router(IBus bus)
+        public override async Task Invoke(InvokeHandlerContext context, Func<Task> next)
         {
-            _bus = bus;
+            string routingSlipJson;
+
+            if (!context.MessageHeaders.TryGetValue(RoutingSlipHeaderKey, out routingSlipJson))
+            {
+                await next().ConfigureAwait(false);
+                return;
+            }
+
+            var routingSlip = JsonConvert.DeserializeObject<RoutingSlip>(routingSlipJson);
+
+            context.Set(routingSlip);
+
+            await next().ConfigureAwait(false);
+
+            await SendToNextStep(context, routingSlip).ConfigureAwait(false);
         }
 
-        public void SendToFirstStep(object message, RoutingSlip routingSlip)
-        {
-            var firstRouteDefinition = routingSlip.Itinerary.First();
-
-            var json = JsonConvert.SerializeObject(routingSlip);
-
-            _bus.SetMessageHeader(message, RoutingSlipHeaderKey, json);
-
-            _bus.Send(firstRouteDefinition.Address, message);
-        }
-
-        public void SendToNextStep(RoutingSlip routingSlip)
+        private static async Task SendToNextStep(IncomingContext context, RoutingSlip routingSlip)
         {
             var currentStep = routingSlip.Itinerary.First();
-            
+
             routingSlip.Itinerary.RemoveAt(0);
 
             var result = new ProcessingStepResult
             {
-                Address = currentStep.Address,
+                Address = currentStep.Address
             };
 
             routingSlip.Log.Add(result);
@@ -46,8 +52,34 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
             var json = JsonConvert.SerializeObject(routingSlip);
 
-            _bus.CurrentMessageContext.Headers[RoutingSlipHeaderKey] = json;
-            _bus.ForwardCurrentMessageTo(nextStep.Address);
+            var messageBeingProcessed = context.Get<IncomingMessage>();
+            messageBeingProcessed.Headers[RoutingSlipHeaderKey] = json;
+
+            await context.ForwardCurrentMessageTo(nextStep.Address);
+        }
+
+        public class Registration : RegisterStep
+        {
+            public Registration()
+                : base(
+                    "RoutingSlipBehavior", typeof (Router),
+                    "Unpacks routing slip and forwards message to next destination")
+            {
+                //InsertBefore(WellKnownStep.MutateIncomingTransportMessage);
+            }
+        }
+    }
+
+    public class RoutingSlips : Feature
+    {
+        public RoutingSlips()
+        {
+            EnableByDefault();
+        }
+
+        protected override void Setup(FeatureConfigurationContext context)
+        {
+            context.Pipeline.Register("RoutingSlipBehavior", typeof(Router), "Unpacks routing slip and forwards message to next destination");
         }
     }
 }
