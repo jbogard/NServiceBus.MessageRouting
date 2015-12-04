@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using NServiceBus.Features;
 using NServiceBus.Pipeline;
 using NServiceBus.Pipeline.Contexts;
 using NServiceBus.Transports;
@@ -56,30 +55,6 @@ namespace NServiceBus.MessageRouting.RoutingSlips
             messageBeingProcessed.Headers[RoutingSlipHeaderKey] = json;
 
             await context.ForwardCurrentMessageTo(nextStep.Address);
-        }
-
-        public class Registration : RegisterStep
-        {
-            public Registration()
-                : base(
-                    "RoutingSlipBehavior", typeof (Router),
-                    "Unpacks routing slip and forwards message to next destination")
-            {
-                //InsertBefore(WellKnownStep.MutateIncomingTransportMessage);
-            }
-        }
-    }
-
-    public class RoutingSlips : Feature
-    {
-        public RoutingSlips()
-        {
-            EnableByDefault();
-        }
-
-        protected override void Setup(FeatureConfigurationContext context)
-        {
-            context.Pipeline.Register("RoutingSlipBehavior", typeof(Router), "Unpacks routing slip and forwards message to next destination");
         }
     }
 }

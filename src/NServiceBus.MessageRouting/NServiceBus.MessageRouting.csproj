@@ -64,6 +64,7 @@
     <Compile Include="RoutingSlips\RoutableMessageBusExtensions.cs" />
     <Compile Include="RoutingSlips\Router.cs" />
     <Compile Include="RoutingSlips\RoutingSlip.cs" />
+    <Compile Include="RoutingSlips\RoutingSlips.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
