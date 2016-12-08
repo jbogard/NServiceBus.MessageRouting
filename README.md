@@ -12,16 +12,28 @@ The [Routing Slip pattern](http://www.enterpriseintegrationpatterns.com/RoutingT
 
 Forwarding is transparent to each handler, nor does each handler need to have any additional configuration for other steps.
 
-To enable in each endpoint, configure routing slips:
+To enable in each endpoint, configure routing slips in your EndpointConfiguration:
 
-    Configure.Instance.RoutingSlips();
+```c#
+configuration.EnableFeature<RoutingSlips>();;
+```
     
-Then kick off the process by sending a message and including the list of destinations:
+Then kick off the process by sending a message and including the list of destinations, either from an IPipelineContext inside a message handler or IMessageSession from your endpoint instance:
 
-    Bus.Route(order, new[] {"Validate", "Fraud", "CreditCheck", "Process"});
-    
+```c#
+// From your endpoint instance
+endpoint.Route(order, new[] {"Validate", "Fraud", "CreditCheck", "Process"});
+
+// Inside a message handler
+context.Route(order, new[] {"Validate", "Fraud", "CreditCheck", "Process"});
+```
+
 Each endpoint needs to include a handler for the message. Optionally, each endpoint can inspect/modify routing slip attachments:
 
-    Bus.GetRoutingSlipFromCurrentMessage().Attachments["FraudResult"] = "Declined";
-    
+```c#
+context.Extensions.Get<RoutingSlip>().Attachments["FraudResult"] = "Declined";
+```
+
+Routing slip attachments are data that you share between different handlers in the route steps. As the message flows from step to step, the original raw transport message is passed through as-is.
+
 That's all there is to it!

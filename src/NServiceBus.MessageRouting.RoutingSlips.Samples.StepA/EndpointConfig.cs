@@ -21,8 +21,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepA
             {
                 LogManager.Use<DefaultFactory>();
 
-                var configuration = new BusConfiguration();
-                configuration.EndpointName("NServiceBus.MessageRouting.RoutingSlips.Samples.StepA");
+                var configuration = new EndpointConfiguration("NServiceBus.MessageRouting.RoutingSlips.Samples.StepA");
 
                 configuration.UseTransport<MsmqTransport>();
                 configuration.UsePersistence<InMemoryPersistence>();
@@ -34,7 +33,8 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepA
             }
             finally
             {
-                await endpoint.Stop();
+                if (endpoint != null)
+                    await endpoint.Stop();
             }
         }
     }

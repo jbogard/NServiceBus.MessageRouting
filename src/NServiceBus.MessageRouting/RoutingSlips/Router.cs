@@ -1,18 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using NServiceBus.Pipeline;
-using NServiceBus.Pipeline.Contexts;
-using NServiceBus.Transports;
-
-namespace NServiceBus.MessageRouting.RoutingSlips
+﻿namespace NServiceBus.MessageRouting.RoutingSlips
 {
-    public class Router : Behavior<InvokeHandlerContext>
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Newtonsoft.Json;
+    using Pipeline;
+
+    public class Router : Behavior<IInvokeHandlerContext>
     {
         public const string RoutingSlipHeaderKey = "NServiceBus.MessageRouting.RoutingSlips.Router";
 
-        public override async Task Invoke(InvokeHandlerContext context, Func<Task> next)
+        public override async Task Invoke(IInvokeHandlerContext context, Func<Task> next)
         {
             string routingSlipJson;
 
@@ -24,14 +22,14 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
             var routingSlip = JsonConvert.DeserializeObject<RoutingSlip>(routingSlipJson);
 
-            context.Set(routingSlip);
+            context.Extensions.Set(routingSlip);
 
             await next().ConfigureAwait(false);
 
             await SendToNextStep(context, routingSlip).ConfigureAwait(false);
         }
 
-        private static async Task SendToNextStep(IncomingContext context, RoutingSlip routingSlip)
+        private static async Task SendToNextStep(IInvokeHandlerContext context, RoutingSlip routingSlip)
         {
             var currentStep = routingSlip.Itinerary.First();
 
@@ -51,8 +49,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
             var json = JsonConvert.SerializeObject(routingSlip);
 
-            var messageBeingProcessed = context.Get<IncomingMessage>();
-            messageBeingProcessed.Headers[RoutingSlipHeaderKey] = json;
+            context.Headers[RoutingSlipHeaderKey] = json;
 
             await context.ForwardCurrentMessageTo(nextStep.Address);
         }

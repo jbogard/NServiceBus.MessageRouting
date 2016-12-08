@@ -24,8 +24,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
             {
                 LogManager.Use<DefaultFactory>();
 
-                var configuration = new BusConfiguration();
-                configuration.EndpointName("NServiceBus.MessageRouting.RoutingSlips.Samples.Sender");
+                var configuration = new EndpointConfiguration("NServiceBus.MessageRouting.RoutingSlips.Samples.Sender");
 
                 configuration.UseTransport<MsmqTransport>();
                 configuration.UsePersistence<InMemoryPersistence>();
@@ -33,7 +32,6 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
 
                 endpoint = await Endpoint.Start(configuration);
 
-                var bus = endpoint.CreateBusContext();
 
                 var toggle = false;
 
@@ -49,7 +47,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
                         };
 
                         Logger.Info("Sending message for step A, B, C");
-                        await bus.Route(messageABC, Guid.NewGuid(), new[]
+                        await endpoint.Route(messageABC, Guid.NewGuid(), new[]
                         {
                             "NServiceBus.MessageRouting.RoutingSlips.Samples.StepA",
                             "NServiceBus.MessageRouting.RoutingSlips.Samples.StepB",
@@ -66,7 +64,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
                         };
 
                         Logger.Info("Sending message for step A, C");
-                        await bus.Route(messageAC, Guid.NewGuid(), new[]
+                        await endpoint.Route(messageAC, Guid.NewGuid(), new[]
                         {
                             "NServiceBus.MessageRouting.RoutingSlips.Samples.StepA",
                             "NServiceBus.MessageRouting.RoutingSlips.Samples.StepC",
