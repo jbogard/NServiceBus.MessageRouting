@@ -1,3 +1,5 @@
+![Icon](https://raw.github.com/jbogard/NServiceBus.MessageRouting/master/package_icon.png)
+
 NServiceBus.MessageRouting
 ==========================
 
@@ -37,3 +39,8 @@ context.Extensions.Get<RoutingSlip>().Attachments["FraudResult"] = "Declined";
 Routing slip attachments are data that you share between different handlers in the route steps. As the message flows from step to step, the original raw transport message is passed through as-is.
 
 That's all there is to it!
+
+
+## Icon 
+
+<a href="http://thenounproject.com/term/Route/41620/" target="_blank">Route</a> designed by <a href="http://thenounproject.com/stevenlester/" target="_blank">Steven Lester</a> from The Noun Project
