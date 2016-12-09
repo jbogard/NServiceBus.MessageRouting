@@ -22,6 +22,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepC
                 configuration.UseTransport<MsmqTransport>();
                 configuration.UsePersistence<InMemoryPersistence>();
                 configuration.EnableFeature<RoutingSlips>();
+                configuration.SendFailedMessagesTo("error");
 
                 endpoint = await Endpoint.Start(configuration);
 
