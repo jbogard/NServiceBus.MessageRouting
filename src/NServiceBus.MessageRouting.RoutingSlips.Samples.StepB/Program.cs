@@ -9,7 +9,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepB
 
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             RunBus().GetAwaiter().GetResult();
         }

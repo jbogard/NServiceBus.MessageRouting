@@ -12,7 +12,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Program));
 
-        static void Main(string[] args)
+        static void Main()
         {
             RunBus().GetAwaiter().GetResult();
         }
