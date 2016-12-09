@@ -71,7 +71,6 @@
   <ItemGroup>
     <Compile Include="EndpointConfig.cs" />
     <Compile Include="Handler.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SequentialProcess.cs" />
   </ItemGroup>
   <ItemGroup>
