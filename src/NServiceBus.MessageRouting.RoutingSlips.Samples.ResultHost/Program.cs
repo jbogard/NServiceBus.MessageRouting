@@ -1,11 +1,8 @@
-
 namespace NServiceBus.MessageRouting.RoutingSlips.Samples.ResultHost
 {
     using System;
     using System.Threading.Tasks;
-    using Messages;
     using NServiceBus;
-    using NServiceBus.Logging;
 
     class Program
     {
