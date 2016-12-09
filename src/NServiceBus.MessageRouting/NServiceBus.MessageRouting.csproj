@@ -65,6 +65,7 @@
     <Compile Include="RoutingSlips\Router.cs" />
     <Compile Include="RoutingSlips\RoutingSlip.cs" />
     <Compile Include="RoutingSlips\RoutingSlips.cs" />
+    <Compile Include="RoutingSlips\Serializer.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

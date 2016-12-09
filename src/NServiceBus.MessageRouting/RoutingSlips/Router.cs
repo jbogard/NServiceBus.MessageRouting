@@ -3,7 +3,6 @@
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Newtonsoft.Json;
     using Pipeline;
 
     public class Router : Behavior<IInvokeHandlerContext>
@@ -20,7 +19,7 @@
                 return;
             }
 
-            var routingSlip = JsonConvert.DeserializeObject<RoutingSlip>(routingSlipJson);
+            var routingSlip = Serializer.Deserialize<RoutingSlip>(routingSlipJson);
 
             context.Extensions.Set(routingSlip);
 
@@ -47,7 +46,7 @@
             if (nextStep == null)
                 return;
 
-            var json = JsonConvert.SerializeObject(routingSlip);
+            var json = Serializer.Serialize(routingSlip);
 
             context.Headers[RoutingSlipHeaderKey] = json;
 
