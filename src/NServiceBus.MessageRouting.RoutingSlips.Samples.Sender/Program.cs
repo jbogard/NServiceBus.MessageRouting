@@ -22,8 +22,6 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
             IEndpointInstance endpoint = null;
             try
             {
-                LogManager.Use<DefaultFactory>();
-
                 var configuration = new EndpointConfiguration("NServiceBus.MessageRouting.RoutingSlips.Samples.Sender");
 
                 configuration.UseTransport<MsmqTransport>();

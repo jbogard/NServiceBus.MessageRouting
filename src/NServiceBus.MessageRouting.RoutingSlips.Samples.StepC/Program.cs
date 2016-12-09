@@ -3,9 +3,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepC
 {
     using System;
     using System.Threading.Tasks;
-    using Messages;
     using NServiceBus;
-    using NServiceBus.Logging;
 
     class Program
     {
@@ -19,8 +17,6 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepC
             IEndpointInstance endpoint = null;
             try
             {
-                DefaultFactory defaultFactory = LogManager.Use<DefaultFactory>();
-
                 var configuration = new EndpointConfiguration("NServiceBus.MessageRouting.RoutingSlips.Samples.StepC");
 
                 configuration.UseTransport<MsmqTransport>();
