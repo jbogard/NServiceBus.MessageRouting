@@ -3,7 +3,6 @@
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Newtonsoft.Json;
     using Pipeline;
 
     public class Router : Behavior<IInvokeHandlerContext>
@@ -20,7 +19,7 @@
                 return;
             }
 
-            var routingSlip = JsonConvert.DeserializeObject<RoutingSlip>(routingSlipJson);
+            var routingSlip = Serializer.Deserialize<RoutingSlip>(routingSlipJson);
 
             context.Extensions.Set(routingSlip);
 
@@ -29,7 +28,7 @@
             await SendToNextStep(context, routingSlip).ConfigureAwait(false);
         }
 
-        private static async Task SendToNextStep(IInvokeHandlerContext context, RoutingSlip routingSlip)
+        private static Task SendToNextStep(IInvokeHandlerContext context, RoutingSlip routingSlip)
         {
             var currentStep = routingSlip.Itinerary.First();
 
@@ -45,13 +44,13 @@
             var nextStep = routingSlip.Itinerary.FirstOrDefault();
 
             if (nextStep == null)
-                return;
+                return Task.FromResult(0);
 
-            var json = JsonConvert.SerializeObject(routingSlip);
+            var json = Serializer.Serialize(routingSlip);
 
             context.Headers[RoutingSlipHeaderKey] = json;
 
-            await context.ForwardCurrentMessageTo(nextStep.Address);
+            return context.ForwardCurrentMessageTo(nextStep.Address);
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using NServiceBus.MessageRouting.RoutingSlips;
 using NUnit.Framework;
-using Newtonsoft.Json;
 using Should;
 
 namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
@@ -15,9 +14,9 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo", "bar");
             routingSlip.Log.Add(new ProcessingStepResult { Address = "baz" });
 
-            var result = JsonConvert.SerializeObject(routingSlip);
+            var result = Serializer.Serialize(routingSlip);
 
-            var deserialized = JsonConvert.DeserializeObject<RoutingSlip>(result);
+            var deserialized = Serializer.Deserialize<RoutingSlip>(result);
 
             deserialized.Id.ShouldEqual(routingSlip.Id);
             deserialized.Itinerary.Count.ShouldEqual(2);
