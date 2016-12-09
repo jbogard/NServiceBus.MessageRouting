@@ -28,7 +28,7 @@
             await SendToNextStep(context, routingSlip).ConfigureAwait(false);
         }
 
-        private static async Task SendToNextStep(IInvokeHandlerContext context, RoutingSlip routingSlip)
+        private static Task SendToNextStep(IInvokeHandlerContext context, RoutingSlip routingSlip)
         {
             var currentStep = routingSlip.Itinerary.First();
 
@@ -44,13 +44,13 @@
             var nextStep = routingSlip.Itinerary.FirstOrDefault();
 
             if (nextStep == null)
-                return;
+                return Task.FromResult(0);
 
             var json = Serializer.Serialize(routingSlip);
 
             context.Headers[RoutingSlipHeaderKey] = json;
 
-            await context.ForwardCurrentMessageTo(nextStep.Address);
+            return context.ForwardCurrentMessageTo(nextStep.Address);
         }
     }
 }
