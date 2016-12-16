@@ -6,6 +6,7 @@
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
+    <iconUrl>https://raw.github.com/jbogard/NServiceBus.MessageRouting/master/package_icon.png</iconUrl>    
     <licenseUrl>https://github.com/jbogard/NServiceBus.MessageRouting/license.txt</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
