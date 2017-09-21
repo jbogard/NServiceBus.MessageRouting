@@ -24,7 +24,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
             {
                 var configuration = new EndpointConfiguration("NServiceBus.MessageRouting.RoutingSlips.Samples.Sender");
 
-                configuration.UseTransport<MsmqTransport>();
+                configuration.UseTransport<LearningTransport>();
                 configuration.UsePersistence<InMemoryPersistence>();
                 configuration.EnableFeature<RoutingSlips>();
                 configuration.SendFailedMessagesTo("error");

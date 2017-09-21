@@ -19,7 +19,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepC
             {
                 var configuration = new EndpointConfiguration("NServiceBus.MessageRouting.RoutingSlips.Samples.StepC");
 
-                configuration.UseTransport<MsmqTransport>();
+                configuration.UseTransport<LearningTransport>();
                 configuration.UsePersistence<InMemoryPersistence>();
                 configuration.EnableFeature<RoutingSlips>();
                 configuration.SendFailedMessagesTo("error");

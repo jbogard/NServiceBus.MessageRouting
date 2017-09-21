@@ -1,0 +1,13 @@
+<Project>
+
+  <ItemGroup>
+    <PackageReference Include="Terrajobst.PlatformCompat.Analyzers" Version="0.0.95-alpha" PrivateAssets="All" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+  </PropertyGroup>
+
+</Project>
