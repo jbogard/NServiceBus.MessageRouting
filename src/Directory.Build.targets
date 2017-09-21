@@ -9,7 +9,6 @@
     <PackageTags>nservicebus</PackageTags>
     <PackageIconUrl>https://raw.github.com/jbogard/NServiceBus.MessageRouting/master/package_icon.png</PackageIconUrl>
     <PackageOutputPath>..\..\nugets</PackageOutputPath>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);IncludePDBsInPackage</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 

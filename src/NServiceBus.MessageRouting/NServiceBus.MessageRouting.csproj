@@ -16,5 +16,6 @@
   <PropertyGroup>
     <PackageId>NServiceBus.MessageRouting</PackageId>
     <PackageDescription>Messaging routing patterns for NServiceBus</PackageDescription>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 </Project>
