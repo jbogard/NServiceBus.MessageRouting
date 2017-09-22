@@ -11,7 +11,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
         protected override void Setup(FeatureConfigurationContext context)
         {
-            context.Pipeline.Register("RoutingSlipBehavior", typeof(Router), "Unpacks routing slip and forwards message to next destination");
+            context.Pipeline.Register("RoutingSlipBehavior", new Router(), "Unpacks routing slip and forwards message to next destination");
         }
     }
 }

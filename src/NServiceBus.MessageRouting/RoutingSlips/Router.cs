@@ -44,7 +44,7 @@
             var nextStep = routingSlip.Itinerary.FirstOrDefault();
 
             if (nextStep == null)
-                return Task.FromResult(0);
+                return TaskExtensions.CompletedTask;
 
             var json = Serializer.Serialize(routingSlip);
 

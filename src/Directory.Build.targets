@@ -1,0 +1,21 @@
+<Project>
+
+  <PropertyGroup>
+    <PackageAuthors>Jimmy Bogard</PackageAuthors>
+    <PackageOwners>Jimmy Bogard</PackageOwners>
+    <PackageLicenseUrl>https://github.com/jbogard/NServiceBus.MessageRouting/license.txt</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageCopyright>Copyright 2015-$([System.DateTime]::UtcNow.ToString(yyyy)) Jimmy Bogard. All rights reserved</PackageCopyright>
+    <PackageTags>nservicebus</PackageTags>
+    <PackageIconUrl>https://raw.github.com/jbogard/NServiceBus.MessageRouting/master/package_icon.png</PackageIconUrl>
+    <PackageOutputPath>..\..\nugets</PackageOutputPath>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);IncludePDBsInPackage</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <Target Name="IncludePDBsInPackage" Condition="'$(IncludeBuildOutput)' != 'false'">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).pdb" PackagePath="lib/$(TargetFramework)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

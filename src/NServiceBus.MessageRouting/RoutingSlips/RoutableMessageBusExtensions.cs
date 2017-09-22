@@ -1,10 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-
-namespace NServiceBus.MessageRouting.RoutingSlips
+﻿namespace NServiceBus.MessageRouting.RoutingSlips
 {
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Newtonsoft.Json;
+
     public static class RoutableMessageBusExtensions
     {
         public static Task Route(this IMessageSession bus, object message, params string[] destinations)
