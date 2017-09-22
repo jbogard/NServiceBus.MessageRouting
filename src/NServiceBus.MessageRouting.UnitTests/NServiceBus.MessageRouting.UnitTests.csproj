@@ -4,11 +4,12 @@
     <TargetFrameworks>net452;netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NServiceBus" Version="[7.0.0-*, 8.0.0)" />
-    <PackageReference Include="Newtonsoft.Json" Version="[10.0.0, 11.0.0)" />
-    <PackageReference Include="NUnit" Version="3.5" />
-    <PackageReference Include="FakeItEasy" Version="2.3.*" />
-    <PackageReference Include="Should" Version="1.0" />
+    <PackageReference Include="NServiceBus" Version="7.0.0-*" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.*" />
+    <PackageReference Include="NUnit" Version="3.*" />
+    <PackageReference Include="FakeItEasy" Version="3.*" />
+    <PackageReference Include="Should" Version="1.*" />
+    <PackageReference Include="System.Collections.Concurrent" Version="4.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NServiceBus.MessageRouting\NServiceBus.MessageRouting.csproj" />

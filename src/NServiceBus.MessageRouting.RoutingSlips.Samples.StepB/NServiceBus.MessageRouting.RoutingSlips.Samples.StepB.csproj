@@ -5,8 +5,8 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NServiceBus" Version="[7.0.0-*, 8.0.0)" />
-    <PackageReference Include="Newtonsoft.Json" Version="[10.0.0, 11.0.0)" />
+    <PackageReference Include="NServiceBus" Version="7.0.0-*" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.*" />
   </ItemGroup>
 
   <ItemGroup>
