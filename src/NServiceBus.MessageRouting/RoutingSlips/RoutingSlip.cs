@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace NServiceBus.MessageRouting.RoutingSlips
+﻿namespace NServiceBus.MessageRouting.RoutingSlips
 {
+    using System;
+    using System.Collections.Generic;
+
     public class RoutingSlip
     {
         private RoutingSlip()
