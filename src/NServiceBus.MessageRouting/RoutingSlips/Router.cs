@@ -30,16 +30,7 @@
 
         private static Task SendToNextStep(IInvokeHandlerContext context, RoutingSlip routingSlip)
         {
-            var currentStep = routingSlip.Itinerary.First();
-
-            routingSlip.Itinerary.RemoveAt(0);
-
-            var result = new ProcessingStepResult
-            {
-                Address = currentStep.Address
-            };
-
-            routingSlip.Log.Add(result);
+            routingSlip.RecordStep();
 
             var nextStep = routingSlip.Itinerary.FirstOrDefault();
 

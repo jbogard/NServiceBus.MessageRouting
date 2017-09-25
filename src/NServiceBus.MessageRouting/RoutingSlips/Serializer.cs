@@ -6,7 +6,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 {
     static class Serializer
     {
-        static Newtonsoft.Json.JsonSerializer jsonSerializer = Newtonsoft.Json.JsonSerializer.CreateDefault();
+        static readonly Newtonsoft.Json.JsonSerializer jsonSerializer = Newtonsoft.Json.JsonSerializer.CreateDefault();
 
         public static T Deserialize<T>(string json)
         {

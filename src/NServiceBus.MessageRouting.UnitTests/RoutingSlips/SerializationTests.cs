@@ -1,7 +1,7 @@
 ﻿using System;
 using NServiceBus.MessageRouting.RoutingSlips;
 using NUnit.Framework;
-using Should;
+using Shouldly;
 
 namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
 {
@@ -18,12 +18,12 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
 
             var deserialized = Serializer.Deserialize<RoutingSlip>(result);
 
-            deserialized.Id.ShouldEqual(routingSlip.Id);
-            deserialized.Itinerary.Count.ShouldEqual(2);
-            deserialized.Itinerary[0].Address.ShouldEqual("foo");
-            deserialized.Itinerary[1].Address.ShouldEqual("bar");
-            deserialized.Log.Count.ShouldEqual(1);
-            deserialized.Log[0].Address.ShouldEqual("baz");
+            deserialized.Id.ShouldBe(routingSlip.Id);
+            deserialized.Itinerary.Count.ShouldBe(2);
+            deserialized.Itinerary[0].Address.ShouldBe("foo");
+            deserialized.Itinerary[1].Address.ShouldBe("bar");
+            deserialized.Log.Count.ShouldBe(1);
+            deserialized.Log[0].Address.ShouldBe("baz");
         }
     }
 }

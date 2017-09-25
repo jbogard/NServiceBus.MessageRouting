@@ -1,4 +1,6 @@
-﻿namespace NServiceBus.MessageRouting.RoutingSlips
+﻿using System.Linq;
+
+namespace NServiceBus.MessageRouting.RoutingSlips
 {
     using System;
     using System.Collections.Generic;
@@ -27,5 +29,19 @@
 
         public IList<ProcessingStep> Itinerary { get; }
         public IList<ProcessingStepResult> Log { get; }
+
+        public void RecordStep()
+        {
+            var currentStep = Itinerary.First();
+
+            Itinerary.RemoveAt(0);
+
+            var result = new ProcessingStepResult
+            {
+                Address = currentStep.Address
+            };
+
+            Log.Add(result);
+        }
     }
 }

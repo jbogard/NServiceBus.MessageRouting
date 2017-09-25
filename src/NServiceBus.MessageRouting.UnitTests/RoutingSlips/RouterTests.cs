@@ -1,91 +1,100 @@
-﻿//using System;
-//using System.Linq;
-//using NServiceBus.MessageRouting.RoutingSlips;
-//using NUnit.Framework;
-//using Should;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using NServiceBus.MessageRouting.RoutingSlips;
+using NServiceBus.Testing;
+using NUnit.Framework;
+using Shouldly;
 
-//namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
-//{
-//    [TestFixture]
-//    public class RouterTests 
-//    {
-//        private class DummyMessage : IMessage
-//        {
-            
-//        }
+namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
+{
+    [TestFixture]
+    public class RouterTests
+    {
+        private class DummyMessage : IMessage
+        {
 
-//        [Test]
-//        public void Should_build_routing_slip()
-//        {
-//            var routingSlipId = Guid.NewGuid();
+        }
 
-//            var routingSlip = new RoutingSlip(routingSlipId, "foo");
+        [Test]
+        public void Should_build_routing_slip()
+        {
+            var routingSlipId = Guid.NewGuid();
 
-//            routingSlip.ShouldNotBeNull();
-//            routingSlip.Id.ShouldEqual(routingSlipId);
-//            routingSlip.Itinerary.Count().ShouldEqual(1);
-//            routingSlip.Itinerary.First().Address.ShouldEqual("foo");
-//        }
+            var routingSlip = new RoutingSlip(routingSlipId, "foo");
 
-//        [Test]
-//        public void Should_send_to_first_destination()
-//        {
-//            var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo");
+            routingSlip.ShouldNotBeNull();
+            routingSlip.Id.ShouldBe(routingSlipId);
+            routingSlip.Itinerary.Count().ShouldBe(1);
+            routingSlip.Itinerary.First().Address.ShouldBe("foo");
+        }
 
-//            var bus = new Bus();
-//            var router = new Router(bus);
+        [Test]
+        public async Task Should_send_to_first_destination()
+        {
+            var bus = new TestableMessageSession();
 
-//            var message = new DummyMessage();
-//            router.SendToFirstStep(message, routingSlip);
+            var message = new DummyMessage();
+            await ((IMessageSession)bus).Route(message, Guid.NewGuid(), "foo");
 
-//            bus.GetMessageHeader(message, Router.RoutingSlipHeaderKey).ShouldNotBeNull();
-//            bus.ExplicitlySent.Count().ShouldEqual(1);
-//            bus.ExplicitlySent.First().Item1.ShouldEqual("foo");
-//            bus.ExplicitlySent.First().Item2.ShouldEqual(message);
-//        }
+            bus.SentMessages.Length.ShouldBe(1);
 
-//        [Test]
-//        public void Should_send_to_next_destination_if_no_error()
-//        {
-//            var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo", "bar");
+            var sentMessage = bus.SentMessages[0];
+            sentMessage.Options.GetHeaders()[Router.RoutingSlipHeaderKey].ShouldNotBeNull();
+            sentMessage.Options.GetDestination().ShouldBe("foo");
+            sentMessage.Message.ShouldBe(message);
+        }
 
-//            var bus = new Bus();
-//            var router = new Router(bus);
+        [Test]
+        public async Task Should_send_to_next_destination_if_no_error()
+        {
+            var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo", "bar");
 
-//            router.SendToNextStep(routingSlip);
+            var router = new Router();
+            var context = new TestableInvokeHandlerContext
+            {
+                MessageHeaders =
+                {
+                    [Router.RoutingSlipHeaderKey] = Newtonsoft.Json.JsonConvert.SerializeObject(routingSlip)
+                }
+            };
 
-//            bus.CurrentMessageContext.Headers[Router.RoutingSlipHeaderKey].ShouldNotBeNull();
+            await router.Invoke(context, () => Task.FromResult(0));
 
-//            routingSlip.Itinerary.Count.ShouldEqual(1);
-//            routingSlip.Log.Count.ShouldEqual(1);
-//            routingSlip.Log[0].Address.ShouldEqual("foo");
+            context.Extensions.TryGet(out routingSlip).ShouldBeTrue();
 
-//            bus.Forwarded.Count().ShouldEqual(1);
-//            bus.Forwarded.ShouldContain("bar");
-//        }
+            context.Headers[Router.RoutingSlipHeaderKey].ShouldNotBeNull();
 
-//        [Test]
-//        public void Should_complete_route()
-//        {
-//            var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo", "bar");
+            routingSlip.Itinerary.Count.ShouldBe(1);
+            routingSlip.Log.Count.ShouldBe(1);
+            routingSlip.Log[0].Address.ShouldBe("foo");
 
-//            var bus = new Bus();
-//            var router = new Router(bus);
+            context.ForwardedMessages.Length.ShouldBe(1);
+            context.ForwardedMessages[0].ShouldBe("bar");
+        }
 
-//            router.SendToNextStep(routingSlip);
-            
-//            bus.CurrentMessageContext.Headers.Clear();
-            
-//            router.SendToNextStep(routingSlip);
+        [Test]
+        public async Task Should_complete_route()
+        {
+            var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo", "bar");
+            routingSlip.RecordStep();
 
-//            bus.CurrentMessageContext.Headers.ContainsKey(Router.RoutingSlipHeaderKey).ShouldBeFalse();
+            var router = new Router();
+            var context = new TestableInvokeHandlerContext
+            {
+                MessageHeaders =
+                {
+                    [Router.RoutingSlipHeaderKey] = Newtonsoft.Json.JsonConvert.SerializeObject(routingSlip)
+                }
+            };
 
-//            routingSlip.Itinerary.Count.ShouldEqual(0);
-//            routingSlip.Log.Count.ShouldEqual(2);
-//            routingSlip.Log[0].Address.ShouldEqual("foo");
+            await router.Invoke(context, () => Task.FromResult(0));
 
-//            bus.Forwarded.Count().ShouldEqual(1);
+            context.Extensions.TryGet(out routingSlip).ShouldBeTrue();
 
-//        }
-//    }
-//}
+            context.Headers.ContainsKey(Router.RoutingSlipHeaderKey).ShouldBeFalse();
+
+            context.ForwardedMessages.Length.ShouldBe(0);
+        }
+    }
+}

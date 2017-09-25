@@ -8,8 +8,9 @@
     <PackageReference Include="Newtonsoft.Json" Version="10.*" />
     <PackageReference Include="NUnit" Version="3.*" />
     <PackageReference Include="FakeItEasy" Version="3.*" />
-    <PackageReference Include="Should" Version="1.*" />
+    <PackageReference Include="Shouldly" Version="2.*" />
     <PackageReference Include="System.Collections.Concurrent" Version="4.*" />
+    <PackageReference Include="NServiceBus.Testing" Version="7.0.0-beta0001" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NServiceBus.MessageRouting\NServiceBus.MessageRouting.csproj" />
