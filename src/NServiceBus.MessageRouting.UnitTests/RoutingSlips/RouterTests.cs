@@ -3,12 +3,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using NServiceBus.MessageRouting.RoutingSlips;
 using NServiceBus.Testing;
-using NUnit.Framework;
+using Xunit;
 using Shouldly;
 
 namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
 {
-    [TestFixture]
     public class RouterTests
     {
         private class DummyMessage : IMessage
@@ -16,7 +15,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
 
         }
 
-        [Test]
+        [Fact]
         public void Should_build_routing_slip()
         {
             var routingSlipId = Guid.NewGuid();
@@ -29,7 +28,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             routingSlip.Itinerary.First().Address.ShouldBe("foo");
         }
 
-        [Test]
+        [Fact]
         public async Task Should_send_to_first_destination()
         {
             var bus = new TestableMessageSession();
@@ -45,7 +44,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             sentMessage.Message.ShouldBe(message);
         }
 
-        [Test]
+        [Fact]
         public async Task Should_send_to_next_destination_if_no_error()
         {
             var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo", "bar");
@@ -73,7 +72,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             context.ForwardedMessages[0].ShouldBe("bar");
         }
 
-        [Test]
+        [Fact]
         public async Task Should_complete_route()
         {
             var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo", "bar");

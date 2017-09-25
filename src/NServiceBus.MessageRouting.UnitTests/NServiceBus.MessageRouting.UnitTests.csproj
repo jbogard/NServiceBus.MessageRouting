@@ -6,7 +6,8 @@
   <ItemGroup>
     <PackageReference Include="NServiceBus" Version="7.0.0-*" />
     <PackageReference Include="Newtonsoft.Json" Version="10.*" />
-    <PackageReference Include="NUnit" Version="3.*" />
+    <PackageReference Include="xunit" Version="2.3.0-beta5-build3769" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-beta5-build3769" />
     <PackageReference Include="FakeItEasy" Version="3.*" />
     <PackageReference Include="Shouldly" Version="2.*" />
     <PackageReference Include="System.Collections.Concurrent" Version="4.*" />
