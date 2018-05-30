@@ -5,12 +5,12 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NServiceBus" Version="7.0.0-*" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.*" />
+    <PackageReference Include="NServiceBus" Version="7.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NServiceBus.MessageRouting.RoutingSlips.Samples.Messages\NServiceBus.MessageRouting.RoutingSlips.Samples.Messages.csproj"/>
+    <ProjectReference Include="..\NServiceBus.MessageRouting.RoutingSlips.Samples.Messages\NServiceBus.MessageRouting.RoutingSlips.Samples.Messages.csproj" />
     <ProjectReference Include="..\NServiceBus.MessageRouting\NServiceBus.MessageRouting.csproj" />
   </ItemGroup>
 </Project>
