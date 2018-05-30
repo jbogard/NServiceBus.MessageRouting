@@ -4,14 +4,14 @@
     <TargetFrameworks>net452;netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NServiceBus" Version="7.0.0-*" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.*" />
-    <PackageReference Include="xunit" Version="2.3.0-beta5-build3769" />
+    <PackageReference Include="NServiceBus" Version="7.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <PackageReference Include="xunit" Version="2.3.1" />
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-beta5-build3769" />
     <PackageReference Include="FakeItEasy" Version="3.*" />
     <PackageReference Include="Shouldly" Version="2.*" />
     <PackageReference Include="System.Collections.Concurrent" Version="4.*" />
-    <PackageReference Include="NServiceBus.Testing" Version="7.0.0-beta0001" />
+    <PackageReference Include="NServiceBus.Testing" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NServiceBus.MessageRouting\NServiceBus.MessageRouting.csproj" />
