@@ -20,7 +20,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
         {
             var routingSlipId = Guid.NewGuid();
 
-            var routingSlip = new RoutingSlip(routingSlipId, "foo");
+            var routingSlip = new RoutingSlip(routingSlipId, null,"foo");
 
             routingSlip.ShouldNotBeNull();
             routingSlip.Id.ShouldBe(routingSlipId);
@@ -47,7 +47,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
         [Fact]
         public async Task Should_send_to_next_destination_if_no_error()
         {
-            var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo", "bar");
+            var routingSlip = new RoutingSlip(Guid.NewGuid(),null, "foo", "bar");
 
             var router = new Router();
             var context = new TestableInvokeHandlerContext
@@ -75,7 +75,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
         [Fact]
         public async Task Should_complete_route()
         {
-            var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo", "bar");
+            var routingSlip = new RoutingSlip(Guid.NewGuid(),null, "foo", "bar");
             routingSlip.RecordStep();
 
             var router = new Router();
