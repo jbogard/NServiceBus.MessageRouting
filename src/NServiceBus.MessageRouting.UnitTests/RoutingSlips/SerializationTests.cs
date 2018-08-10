@@ -10,7 +10,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
         [Fact]
         public void Should_be_able_to_serialize()
         {
-            var routingSlip = new RoutingSlip(Guid.NewGuid(), "foo", "bar");
+            var routingSlip = new RoutingSlip(Guid.NewGuid(),null, "foo", "bar");
             routingSlip.Log.Add(new ProcessingStepResult { Address = "baz" });
 
             var result = Serializer.Serialize(routingSlip);
