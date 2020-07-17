@@ -7,20 +7,19 @@ NServiceBus.MessageRouting
 
 Currently the patterns implemented include the routing slip. Planned are a true saga implementation (w/ compensating actions) and more.
 
+![CI](https://github.com/jbogard/NServiceBus.MessageRouting/workflows/CI/badge.svg)
+[![NuGet](https://img.shields.io/nuget/dt/NServiceBus.MessageRouting.svg)](https://www.nuget.org/packages/NServiceBus.MessageRouting) 
+[![NuGet](https://img.shields.io/nuget/vpre/NServiceBus.MessageRouting.svg)](https://www.nuget.org/packages/NServiceBus.MessageRouting)
+[![MyGet (dev)](https://img.shields.io/myget/nservicebus-messagerouting-ci/v/NServiceBus.MessageRouting.svg)](https://myget.org/gallery/nservicebus-messagerouting-ci)
+
 Routing Slips
 -------------
 
 The [Routing Slip pattern](http://www.enterpriseintegrationpatterns.com/RoutingTable.html) enables you to route a message to one or more destinations. Each step handles the message and forwards to the next step.
 
 Forwarding is transparent to each handler, nor does each handler need to have any additional configuration for other steps.
-
-To enable in each endpoint, configure routing slips in your EndpointConfiguration:
-
-```c#
-configuration.EnableFeature<RoutingSlips>();;
-```
     
-Then kick off the process by sending a message and including the list of destinations, either from an IPipelineContext inside a message handler or IMessageSession from your endpoint instance:
+Kick off the process by sending a message and including the list of destinations, either from an IPipelineContext inside a message handler or IMessageSession from your endpoint instance:
 
 ```c#
 // From your endpoint instance
