@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using NServiceBus.MessageRouting.RoutingSlips;
 using NServiceBus.Testing;
@@ -54,7 +55,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             {
                 MessageHeaders =
                 {
-                    [Router.RoutingSlipHeaderKey] = Newtonsoft.Json.JsonConvert.SerializeObject(routingSlip)
+                    [Router.RoutingSlipHeaderKey] = System.Text.Json.JsonSerializer.Serialize(routingSlip)
                 }
             };
 
@@ -83,7 +84,7 @@ namespace NServiceBus.MessageRouting.UnitTests.RoutingSlips
             {
                 MessageHeaders =
                 {
-                    [Router.RoutingSlipHeaderKey] = Newtonsoft.Json.JsonConvert.SerializeObject(routingSlip)
+                    [Router.RoutingSlipHeaderKey] = System.Text.Json.JsonSerializer.Serialize(routingSlip)
                 }
             };
 

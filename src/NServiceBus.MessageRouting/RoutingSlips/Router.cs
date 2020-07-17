@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.MessageRouting.RoutingSlips
 {
     using System;
+    using System.Text.Json;
     using System.Linq;
     using System.Threading.Tasks;
     using Pipeline;
@@ -11,15 +12,13 @@
 
         public override async Task Invoke(IInvokeHandlerContext context, Func<Task> next)
         {
-            string routingSlipJson;
-
-            if (!context.MessageHeaders.TryGetValue(RoutingSlipHeaderKey, out routingSlipJson))
+            if (!context.MessageHeaders.TryGetValue(RoutingSlipHeaderKey, out var routingSlipJson))
             {
                 await next().ConfigureAwait(false);
                 return;
             }
 
-            var routingSlip = Serializer.Deserialize<RoutingSlip>(routingSlipJson);
+            var routingSlip = JsonSerializer.Deserialize<RoutingSlip>(routingSlipJson);
 
             context.Extensions.Set(routingSlip);
 
@@ -35,9 +34,9 @@
             var nextStep = routingSlip.Itinerary.FirstOrDefault();
 
             if (nextStep == null)
-                return TaskExtensions.CompletedTask;
+                return Task.CompletedTask;
 
-            var json = Serializer.Serialize(routingSlip);
+            var json = JsonSerializer.Serialize(routingSlip);
 
             context.Headers[RoutingSlipHeaderKey] = json;
 

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.ComponentModel;
+using System.Linq;
 
 namespace NServiceBus.MessageRouting.RoutingSlips
 {
@@ -7,7 +8,8 @@ namespace NServiceBus.MessageRouting.RoutingSlips
 
     public class RoutingSlip
     {
-        private RoutingSlip()
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public RoutingSlip()
         {
             Attachments = new Dictionary<string, string>();
             Itinerary = new List<ProcessingStep>();
@@ -17,18 +19,18 @@ namespace NServiceBus.MessageRouting.RoutingSlips
         public RoutingSlip(Guid id, params string[] destinations) : this()
         {
             Id = id;
-            destinations = destinations ?? new string[0];
+            destinations ??= new string[0];
             foreach (var destination in destinations)
             {
                 Itinerary.Add(new ProcessingStep { Address = destination });
             }
         }
 
-        public Guid Id { get; }
-        public IDictionary<string, string> Attachments { get; }
+        public Guid Id { get; set; }
+        public IDictionary<string, string> Attachments { get; set; }
 
-        public IList<ProcessingStep> Itinerary { get; }
-        public IList<ProcessingStepResult> Log { get; }
+        public IList<ProcessingStep> Itinerary { get; set; }
+        public IList<ProcessingStepResult> Log { get; set; }
 
         public void RecordStep()
         {
