@@ -20,7 +20,6 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.StepB
                 var configuration = new EndpointConfiguration("NServiceBus.MessageRouting.RoutingSlips.Samples.StepB");
 
                 configuration.UseTransport<LearningTransport>();
-                configuration.UsePersistence<InMemoryPersistence>();
                 configuration.EnableFeature<RoutingSlips>();
                 configuration.SendFailedMessagesTo("error");
 

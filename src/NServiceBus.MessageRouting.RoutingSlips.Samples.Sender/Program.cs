@@ -25,7 +25,6 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
                 var configuration = new EndpointConfiguration("NServiceBus.MessageRouting.RoutingSlips.Samples.Sender");
 
                 configuration.UseTransport<LearningTransport>();
-                configuration.UsePersistence<InMemoryPersistence>();
                 configuration.EnableFeature<RoutingSlips>();
                 configuration.SendFailedMessagesTo("error");
 
@@ -34,6 +33,7 @@ namespace NServiceBus.MessageRouting.RoutingSlips.Samples.Sender
 
                 var toggle = false;
 
+                Logger.Info("Press <enter> to generate a conversation");
                 while (Console.ReadLine() != null)
                 {
                     if (toggle)

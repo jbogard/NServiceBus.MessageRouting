@@ -1,18 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net472;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net472;net6.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-    <PackageReference Include="NServiceBus" Version="7.0.1" />
-    <PackageReference Include="System.Text.Json" Version="4.7.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
     <PackageReference Include="FakeItEasy" Version="6.1.0" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
     <PackageReference Include="System.Collections.Concurrent" Version="4.*" />
-    <PackageReference Include="NServiceBus.Testing" Version="7.0.0" />
+    <PackageReference Include="NServiceBus.Testing" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NServiceBus.MessageRouting\NServiceBus.MessageRouting.csproj" />
